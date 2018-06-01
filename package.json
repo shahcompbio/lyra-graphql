@@ -5,8 +5,22 @@
   "license": "MIT",
   "dependencies": {
     "apollo-server": "^2.0.0-beta.2",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
     "elasticsearch": "^15.0.0",
     "graphql": "^0.13.2",
-    "graphql-yoga": "^1.13.1"
+    "graphql-yoga": "^1.13.1",
+    "nodemon": "^1.17.5"
+  },
+  "babel": {
+    "presets": [
+      "env"
+    ]
+  },
+  "scripts": {
+    "build": "babel src -d lib",
+    "start": "nodemon src/index.js --exec babel-node --presets es2015,stage-2"
   }
 }
