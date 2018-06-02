@@ -12,6 +12,7 @@
     "elasticsearch": "^15.0.0",
     "graphql": "^0.13.2",
     "graphql-yoga": "^1.13.1",
+    "lodash": "^4.17.10",
     "nodemon": "^1.17.5"
   },
   "babel": {
