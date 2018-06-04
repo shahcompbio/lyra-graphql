@@ -2,7 +2,7 @@ import * as tree from "./tree.js";
 import * as segs from "./segs.js";
 import { merge } from "lodash";
 
-import client from "../api/elasticsearch.js";
+import client from "./api/elasticsearch.js";
 
 const { ApolloServer, gql } = require("apollo-server");
 

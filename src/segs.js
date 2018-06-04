@@ -1,6 +1,6 @@
 const { gql } = require("apollo-server");
 
-import client from "../api/elasticsearch.js";
+import client from "./api/elasticsearch.js";
 
 export const schema = gql`
   extend type Query {
