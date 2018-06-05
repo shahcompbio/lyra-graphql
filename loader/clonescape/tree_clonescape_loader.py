@@ -8,9 +8,10 @@ from common.analysis_entry_loader import AnalysisEntryLoader
 from common.yaml_data_parser import YamlData
 from common.tree_loader import TreeLoader
 from common.segs_loader import SegsLoader
+from common.bins_loader import BinsLoader
 
 
-dashboard_type = "TREE_CELLSCAPE"
+dashboard_type = "TREE_CLONESCAPE"
 
 
 def _set_logger_config(verbosity=None):
@@ -95,6 +96,31 @@ def load_segs_data(args, yaml_data):
             analysis_file=seg_file
         )
 
+def load_bins_data(args, yaml_data):
+    logging.info("")
+    logging.info("")
+    logging.info("==================")
+    logging.info("LOADING BINS DATA")
+    logging.info("==================")
+    index_name = yaml_data.get_index_name(dashboard_type, "bins")
+
+    bins_loader = BinsLoader(
+        es_doc_type=index_name,
+        es_index=index_name,
+        es_host=args.host,
+        es_port=args.port
+    )
+
+    bin_files = yaml_data.get_file_paths("bins")
+
+    if bins_loader.es_tools.exists_index():
+        logging.info('Bin data for analysis already exists - will delete old index')
+        bins_loader.es_tools.delete_index()
+
+    for bin_file in bin_files:
+        bins_loader.load_file(
+            analysis_file=bin_file
+        )
 
 def get_args():
     '''
@@ -158,6 +184,7 @@ def main():
     load_analysis_entry(args, yaml_data)
     load_tree_data(args, yaml_data)
     load_segs_data(args, yaml_data)
+    load_bins_data(args, yaml_data)
 
 
 

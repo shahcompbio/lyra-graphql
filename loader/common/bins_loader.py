@@ -1,5 +1,5 @@
 '''
-Parser/Indexer for segment data in csv format
+Parser/Indexer for bin data in csv format
 
 Created on October 28, 2015
 
@@ -16,13 +16,12 @@ import sys
 import os
 import math
 import __builtin__
-import networkx as nx
 from utils.analysis_loader import AnalysisLoader
 
 
-class BinLoader(AnalysisLoader):
+class BinsLoader(AnalysisLoader):
 
-    ''' Class TreeLoader '''
+    ''' Class BinsLoader '''
 
     __index_buffer__ = []
     __field_mapping__ = {
@@ -58,7 +57,7 @@ class BinLoader(AnalysisLoader):
             use_ssl=False,
             http_auth=None,
             timeout=None):
-        super(BinLoader, self).__init__(
+        super(BinsLoader, self).__init__(
             es_doc_type=es_doc_type,
             es_index=es_index,
             es_host=es_host,
@@ -284,7 +283,7 @@ def _set_logger_config(verbosity=None):
 def main():
     args = get_args()
     _set_logger_config(args.verbosity)
-    es_loader = BinLoader(
+    es_loader = BinsLoader(
         es_doc_type=args.index,
         es_index=args.index,
         es_host=args.host,
