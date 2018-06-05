@@ -17,7 +17,6 @@ import sys
 import math
 import __builtin__
 import networkx as nx
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from utils.analysis_loader import AnalysisLoader
 
 

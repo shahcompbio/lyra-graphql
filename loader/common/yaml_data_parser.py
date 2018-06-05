@@ -4,10 +4,11 @@ import traceback
 import argparse
 import os
 import sys
+import dashboards
 
 
 
-class TreeYamlData(object):
+class YamlData(object):
     def __init__(self, yaml_file_path):
         self.yaml_path = yaml_file_path
         yaml_data = self.parse_yaml_file(yaml_file_path)
@@ -38,28 +39,21 @@ class TreeYamlData(object):
 
 
 
-    def get_index_name(self, type):
+    def get_index_name(self, dashboard, type):
+        dashboard_code = dashboards.DASHBOARDS[dashboard].lower()
         base_index_name = self.yaml_data['analysis_id'].lower()
 
-        if type.lower() == "tree":
-            return base_index_name + "_tree"
-
-        elif type.lower() == "segs":
-            return base_index_name + "_segs"
-
+        return dashboard_code + "_" + base_index_name + "_" + type.lower()
 
 
     def get_file_paths(self, type):
         files = self.yaml_data['files']
 
-        if type.lower() == "tree":
-            return files['tree']
-
-        elif type.lower() == "tree_order":
-            return files['tree_order']
-
-        elif type.lower() == "segs":
-            return files['segs']
+        try:
+            return files[type.lower()]
+        except KeyError:
+            logging.error("Error with yaml file key %s.", type)
+            return
 
 
     def get_analysis_entry(self, dashboard):
@@ -67,9 +61,7 @@ class TreeYamlData(object):
             'analysis_id': self.yaml_data['analysis_id'],
             'title': self.yaml_data['jira_id'],
             'description': self.yaml_data['description'],
-            'dashboard': dashboard,
-            'tree_index': self.get_index_name("tree"),
-            'segs_index': self.get_index_name("segs")
+            'dashboard': dashboard
         }
 
         return record

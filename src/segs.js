@@ -33,7 +33,7 @@ export const resolvers = {
   Query: {
     async chromosomes(_, { analysis }) {
       const results = await client.search({
-        index: analysis.toLowerCase() + "_segs",
+        index: `ce00_${analysis.toLowerCase()}_segs`,
         body: {
           size: 0,
           aggs: {
@@ -67,7 +67,7 @@ export const resolvers = {
 
     async segs(_, { analysis, indices }) {
       const results = await client.search({
-        index: analysis.toLowerCase() + "_tree",
+        index: `ce00_${analysis.toLowerCase()}_tree`,
         body: {
           size: 50000,
           sort: [

@@ -1,2 +1,6 @@
+
+# loader
+/loader/**/*.pyc
+
 /lib
 /node_modules

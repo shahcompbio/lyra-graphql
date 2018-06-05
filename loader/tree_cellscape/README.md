@@ -13,7 +13,6 @@ analysis_id:  <ANALYSIS_ID>
 jira_id:      <JIRA_ID>
 library_id:   <LIBRARY_ID>
 description:  <DESCRIPTION>
-type: "tree"
 files:
   tree: /exact/path/to/rooted_tree.gml
   tree_order: /exact/path/to/tree_order.tsv
@@ -27,7 +26,7 @@ files:
 * jira_id = JIRA ticket identifier associated with analysis
 * library_id = identifier for chip used in analysis
 * description = brief outline of sample
-* type = "tree" for tree Cellscape
+* type = "TREE_CELLSCAPE" for tree Cellscape
 * files = exact paths to other input files
 
 ### Tree Data (GML)

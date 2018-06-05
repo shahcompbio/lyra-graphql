@@ -34,7 +34,7 @@ const resolvers = {
   Query: {
     async dashboards() {
       const results = await client.search({
-        index: "tree_analysis",
+        index: "analysis",
         body: {
           size: 50000,
           aggs: {
@@ -54,7 +54,7 @@ const resolvers = {
     },
     async analysis(_, { analysis, dashboard }) {
       const results = await client.search({
-        index: "tree_analysis",
+        index: "analysis",
         body: {
           query: {
             bool: {

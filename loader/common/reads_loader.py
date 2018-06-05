@@ -17,11 +17,10 @@ import os
 import math
 import __builtin__
 import networkx as nx
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from utils.analysis_loader import AnalysisLoader
 
 
-class SegsLoader(AnalysisLoader):
+class BinLoader(AnalysisLoader):
 
     ''' Class TreeLoader '''
 
@@ -35,11 +34,19 @@ class SegsLoader(AnalysisLoader):
         "chrom_number": "str",
         "state": "float",
         "copy_number": "int",
+        "start": "int",
         "end": "int",
-        "integer_median": "float",
-        "median": "float",
+        "integer_copy_scale": "float",
         "cell_id": "str",
-        "start": "int"
+        "copy": "float",
+        "cor_gc": "float",
+        "cor_map": "float",
+        "gc": "float",
+        "ideal": "bool",
+        "map": "float",
+        "reads": "int",
+        "valid": "bool",
+        "width": "int"
     }
 
     def __init__(
@@ -51,7 +58,7 @@ class SegsLoader(AnalysisLoader):
             use_ssl=False,
             http_auth=None,
             timeout=None):
-        super(SegsLoader, self).__init__(
+        super(BinLoader, self).__init__(
             es_doc_type=es_doc_type,
             es_index=es_index,
             es_host=es_host,
@@ -66,7 +73,7 @@ class SegsLoader(AnalysisLoader):
 
         self.disable_index_refresh()
         self._get_csv_dialect(analysis_file)
-        self._load_segs_data(analysis_file)
+        self._load_bin_data(analysis_file)
 
         self.enable_index_refresh()
 
@@ -83,7 +90,7 @@ class SegsLoader(AnalysisLoader):
             logging.error('Unable to parse CSV file.')
             exit(1)
 
-    def _load_segs_data(self, analysis_file):
+    def _load_bin_data(self, analysis_file):
 
         with open(analysis_file) as csv_fh:
 
@@ -208,11 +215,11 @@ def get_args():
         help='Index name',
         type=str)
     parser.add_argument(
-        '-segs',
-        '--segs_file',
-        dest='segs_file',
+        '-bin',
+        '--bin_file',
+        dest='bin_file',
         action='store',
-        help='Segs data file',
+        help='Bin data file',
         type=str)
     parser.add_argument(
         '-H',
@@ -277,13 +284,13 @@ def _set_logger_config(verbosity=None):
 def main():
     args = get_args()
     _set_logger_config(args.verbosity)
-    es_loader = SegsLoader(
+    es_loader = BinLoader(
         es_doc_type=args.index,
         es_index=args.index,
         es_host=args.host,
         es_port=args.port)
 
-    es_loader.load_file(analysis_file=args.segs_file)
+    es_loader.load_file(analysis_file=args.bin_file)
 
 
 

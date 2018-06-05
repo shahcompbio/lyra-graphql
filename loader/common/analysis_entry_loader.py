@@ -4,15 +4,14 @@ import traceback
 import argparse
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from utils.es_utils import ElasticSearchTools
-from tree_yaml_data import TreeYamlData
+from yaml_data_parser import YamlData
 
-class TreeAnalysisIndexLoader(object):
+class AnalysisEntryLoader(object):
     '''
     Populates published_dashboards_index
     '''
-    index_name = "tree_analysis"
+    index_name = "analysis"
 
 
     def __init__(self, host, port, use_ssl=False, http_auth=None):
@@ -25,9 +24,9 @@ class TreeAnalysisIndexLoader(object):
         self.use_ssl = use_ssl
         self.http_auth = http_auth
 
-    def import_file(self, record):
+    def import_file(self, record, dashboard):
         '''
-        Imports the imput file contents to the published_dashboards_index in Elasticsearch.
+        Imports yaml file as entry into analysis index
         '''
         try:
             self.es_tools.init_host(
@@ -38,13 +37,13 @@ class TreeAnalysisIndexLoader(object):
 
             # Create index if necessary
             if not self.es_tools.exists(self.index_name):
-                logging.info("Creating tree analysis index with name %s", self.index_name)
+                logging.info("Creating analysis index with name %s", self.index_name)
                 self.es_tools.create_index(self.get_mappings())
 
             self.es_tools.refresh_index()
 
             # Delete analysis entry if it already exists
-            r = self.es_tools.search(self.analysis_record_query(record))
+            r = self.es_tools.search(self.analysis_record_query(record, dashboard))
             if r['hits']['total'] > 0:
                 logging.info('Duplicate analysis found - deleting old record')
                 self.es_tools.delete_record(r['hits']['hits'][0])
@@ -86,7 +85,7 @@ class TreeAnalysisIndexLoader(object):
 
         return mappings
 
-    def analysis_record_query(self, record):
+    def analysis_record_query(self, record, dashboard):
         '''
         Returns query to get analysis record
         '''
@@ -96,7 +95,7 @@ class TreeAnalysisIndexLoader(object):
                     {
                         "term": {
                             "dashboard": {
-                                "value": "TREE_CELLSCAPE"
+                                "value": dashboard
                             }
                         }
                     },
@@ -129,6 +128,14 @@ def get_args():
         dest='yaml_file',
         action='store',
         help='Configuration file in Yaml format',
+        required=True,
+        type=str)
+    required_arguments.add_argument(
+        '-d',
+        '--dashboard',
+        dest='dashboard',
+        action='store',
+        help='dashboard name',
         required=True,
         type=str)
     parser.add_argument(
@@ -201,17 +208,17 @@ def main():
     try:
 
         _set_logger_config(args.verbosity)
-        loader = TreeAnalysisIndexLoader(
+        loader = AnalysisEntryLoader(
         args.host,
         args.port,
         use_ssl=args.use_ssl,
         http_auth=http_auth)
 
 
-        yaml_data = TreeYamlData(args.yaml_file)
-        record = yaml_data.get_analysis_entry("TREE_CELLSCAPE")
+        yaml_data = YamlData(args.yaml_file)
+        record = yaml_data.get_analysis_entry(args.dashboard)
 
-        loader.import_file(record)
+        loader.import_file(record, args.dashboard)
     except Exception:
         logging.error(traceback.format_exc(traceback.extract_stack()))
     pass

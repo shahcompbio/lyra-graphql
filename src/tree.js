@@ -30,7 +30,7 @@ export const resolvers = {
   Query: {
     async treeRoot(_, { analysis }) {
       const results = await client.search({
-        index: analysis.toLowerCase() + "_tree",
+        index: `ce00_${analysis.toLowerCase()}_tree`,
         body: {
           size: 1,
           query: {
@@ -48,7 +48,7 @@ export const resolvers = {
       const term = id ? { cell_id: id } : { heatmap_order: index };
 
       const results = await client.search({
-        index: analysis.toLowerCase() + "_tree",
+        index: `ce00_${analysis.toLowerCase()}_tree`,
         body: {
           size: 1,
           query: {
@@ -65,7 +65,7 @@ export const resolvers = {
       const [minIndex, maxIndex] = range;
 
       const results = await client.search({
-        index: analysis.toLowerCase() + "_tree",
+        index: `ce00_${analysis.toLowerCase()}_tree`,
         body: {
           size: 50000,
           sort: [

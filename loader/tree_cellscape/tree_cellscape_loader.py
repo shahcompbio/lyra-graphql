@@ -2,10 +2,16 @@
 import logging
 import argparse
 import sys
-from tree_analysis_loader import TreeAnalysisIndexLoader
-from tree_yaml_data import TreeYamlData
-from tree_loader import TreeLoader
-from segs_loader import SegsLoader
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from common.analysis_entry_loader import AnalysisEntryLoader
+from common.yaml_data_parser import YamlData
+from common.tree_loader import TreeLoader
+from common.segs_loader import SegsLoader
+
+
+dashboard_type = "TREE_CELLSCAPE"
+
 
 def _set_logger_config(verbosity=None):
     # Set logging to console, default verbosity to INFO.
@@ -29,20 +35,27 @@ def _set_logger_config(verbosity=None):
 
 
 def load_analysis_entry(args, yaml_data):
+    logging.info("")
+    logging.info("")
+    logging.info("==================")
     logging.info("LOADING TREE ANALYSIS ENTRY")
-    analysis_loader = TreeAnalysisIndexLoader(
+    logging.info("==================")
+    analysis_loader = AnalysisEntryLoader(
         host=args.host,
         port=args.port
     )
-    record = yaml_data.get_analysis_entry("TREE_CELLSCAPE")
-    analysis_loader.import_file(record)
+    record = yaml_data.get_analysis_entry(dashboard_type)
+    analysis_loader.import_file(record, dashboard_type)
     logging.info("Tree analysis entry loaded")
 
 
 def load_tree_data(args, yaml_data):
     logging.info("")
+    logging.info("")
+    logging.info("==================")
     logging.info("LOADING TREE DATA")
-    index_name = yaml_data.get_index_name("tree")
+    logging.info("==================")
+    index_name = yaml_data.get_index_name(dashboard_type, "tree")
 
     tree_loader = TreeLoader(
         es_doc_type=index_name,
@@ -58,8 +71,11 @@ def load_tree_data(args, yaml_data):
 
 def load_segs_data(args, yaml_data):
     logging.info("")
+    logging.info("")
+    logging.info("==================")
     logging.info("LOADING SEGS DATA")
-    index_name = yaml_data.get_index_name("segs")
+    logging.info("==================")
+    index_name = yaml_data.get_index_name(dashboard_type, "segs")
 
     segs_loader = SegsLoader(
         es_doc_type=index_name,
@@ -138,7 +154,7 @@ def get_args():
 def main():
     args = get_args()
     _set_logger_config(args.verbosity)
-    yaml_data = TreeYamlData(args.yaml_file)
+    yaml_data = YamlData(args.yaml_file)
     load_analysis_entry(args, yaml_data)
     load_tree_data(args, yaml_data)
     load_segs_data(args, yaml_data)
