@@ -1,3 +1,4 @@
+import "babel-polyfill";
 import * as tree from "./tree.js";
 import * as segs from "./segs.js";
 import { merge } from "lodash";
@@ -103,5 +104,10 @@ const server = new ApolloServer({
   typeDefs: [schema, tree.schema, segs.schema],
   resolvers: merge(resolvers, tree.resolvers, segs.resolvers)
 });
+
+const express = require("express");
+const { registerServer } = require("apollo-server-express");
+const app = express();
+registerServer({ server, app, path: "/graphql" });
 
 server.listen().then(({ url }) => console.log(`Server is running on ${url}`));
