@@ -8,6 +8,7 @@ from common.analysis_entry_loader import AnalysisEntryLoader
 from common.yaml_data_parser import YamlData
 from common.tree_loader import TreeLoader
 from common.segs_loader import SegsLoader
+from common.metrics_loader import MetricsLoader
 
 
 dashboard_type = "TREE_CELLSCAPE"
@@ -66,7 +67,8 @@ def load_tree_data(args, yaml_data):
 
     tree_loader.load_file(
         analysis_file=yaml_data.get_file_paths("tree"),
-        ordering_file=yaml_data.get_file_paths("tree_order")
+        ordering_file=yaml_data.get_file_paths("tree_order"),
+        root_id=yaml_data.get_file_paths("tree_root")
     )
 
 def load_segs_data(args, yaml_data):
@@ -94,6 +96,37 @@ def load_segs_data(args, yaml_data):
         segs_loader.load_file(
             analysis_file=seg_file
         )
+
+def load_metrics_data(args, yaml_data):
+    logging.info("")
+    logging.info("")
+    logging.info("==================")
+    logging.info("LOADING METRIC DATA")
+    logging.info("==================")
+    index_name = yaml_data.get_index_name(dashboard_type, "qc")
+
+    metrics_loader = MetricsLoader(
+        es_doc_type=index_name,
+        es_index=index_name,
+        es_host=args.host,
+        es_port=args.port
+    )
+
+    metric_files = yaml_data.get_file_paths('metrics')
+
+    if metric_files is not None:
+        if metrics_loader.es_tools.exists_index():
+            logging.info('Metric data for analysis already exists - will delete old index')
+            metrics_loader.es_tools.delete_index()
+
+        for metric_file in metric_files:
+            metrics_loader.load_file(
+                analysis_file=metric_file
+            )
+    else:
+        logging.info("No metric files")
+
+
 
 
 def get_args():
@@ -158,6 +191,7 @@ def main():
     load_analysis_entry(args, yaml_data)
     load_tree_data(args, yaml_data)
     load_segs_data(args, yaml_data)
+    load_metrics_data(args, yaml_data)
 
 
 

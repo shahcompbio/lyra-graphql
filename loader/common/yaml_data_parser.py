@@ -52,8 +52,8 @@ class YamlData(object):
         try:
             return files[type.lower()]
         except KeyError:
-            logging.error("Error with yaml file key %s.", type)
-            return
+            logging.info("No file with key %s.", type)
+            return None
 
 
     def get_analysis_entry(self, dashboard):
