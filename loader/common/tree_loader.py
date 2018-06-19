@@ -1,9 +1,12 @@
 '''
-Generic parser/indexer for analysis results in csv file format
+Parser/Indexer for tree files
 
-Created on October 28, 2015
+Required:
+* .gml file
+* [OPTIONAL] root name
+* [OPTIONAL] .tsv ordering file
 
-@author: dmachev
+
 '''
 
 import csv
@@ -44,7 +47,7 @@ class TreeLoader(AnalysisLoader):
             http_auth=http_auth,
             timeout=timeout)
 
-    def load_file(self, analysis_file=None, ordering_file=None):
+    def load_file(self, analysis_file=None, ordering_file=None, root_id=None):
         if self.es_tools.exists_index():
             logging.info('Tree data for analysis already exists - will delete old index')
             self.es_tools.delete_index()
@@ -52,22 +55,65 @@ class TreeLoader(AnalysisLoader):
         self.create_index()
 
         self.disable_index_refresh()
-        tree = nx.read_gml(analysis_file)
-        ordering = self._get_tree_ordering(ordering_file)
+        tree = self._get_rooted_tree(analysis_file, root_id)
+        ordering = self._get_tree_ordering(ordering_file, tree, root_id)
 
         self._load_tree_data(tree, ordering)
 
         self.enable_index_refresh()
 
-    def _get_tree_ordering(self, ordering_file):
+
+
+    def _get_rooted_tree(self, analysis_file, root_id):
+        if root_id is not None:
+            graph = nx.read_gml(analysis_file)
+            new_graph = nx.Graph()
+
+            for edge in graph.edges():
+                new_graph.add_edge(edge[0], edge[1])
+
+            tree = nx.dfs_tree(new_graph, root_id)
+        else:
+            tree = nx.read_gml(analysis_file)
+
+        return tree
+
+
+
+
+    def _get_tree_ordering(self, ordering_file, tree, root_id):
+
+
+        def _count_descendents(node):
+            try:
+                descendent_count = len(nx.descendants(tree, node)) + 1
+                return descendent_count
+            except KeyError:
+                return 0
 
         ordering = {}
 
-        with open(ordering_file) as tsv_in:
-            tsv_in = csv.reader(tsv_in, delimiter='\t')
+        if ordering_file is not None:
+            with open(ordering_file) as tsv_in:
+                tsv_in = csv.reader(tsv_in, delimiter='\t')
 
-            for row in tsv_in:
-                ordering[row[0].strip()] = [child.strip() for child in row[1].split(',')]
+                for row in tsv_in:
+                    ordering[row[0].strip()] = [child.strip() for child in row[1].split(',')]
+
+        else:
+            todo_list = [root_id]
+
+            while todo_list != []:
+                curr_node = todo_list.pop(0)
+
+                curr_children = nx.dfs_successors(tree, curr_node, 1)
+
+                if curr_children != {}:
+                    curr_children = curr_children[curr_node]
+                    curr_children.sort(key=_count_descendents)
+                    ordering[curr_node.strip()] = [child.strip() for child in curr_children]
+
+                    todo_list = curr_children + todo_list
 
         return ordering
 
@@ -75,24 +121,14 @@ class TreeLoader(AnalysisLoader):
 
         all_nodes = list(tree.nodes)
         [tree_root] = [n for n in all_nodes if tree.in_degree(n)==0]
-
         todo_list = [[tree_root, 'root']]
         heatmap_index = 0
-
-
-        def _count_descendents(self, node):
-            try:
-                descendent_count = len(nx.descendants(tree, node)) + 1
-                return descendent_count
-            except KeyError:
-                return 0
 
         while todo_list != []:
             [curr_node, curr_parent] = todo_list.pop(0)
 
             try:
                 curr_children = ordering[curr_node]
-                #curr_children.sort(key=_count_descendents)
 
                 num_successors = len(nx.descendants(tree, curr_node))
 
@@ -165,8 +201,7 @@ def get_args():
     Argument parser
     '''
     parser = argparse.ArgumentParser(
-        description=('Creates an index in Elasticsearch called published_dashboards_index, ' +
-                     'and loads it with the data contained in the infile.')
+        description=('Creates an index in Elasticsearch for tree node data and parses appropriate gml file')
     )
     required_arguments = parser.add_argument_group("required arguments")
     parser.add_argument(
@@ -189,6 +224,14 @@ def get_args():
         dest='ordering_file',
         action='store',
         help='Ordering file for tree',
+        type=str)
+
+    parser.add_argument(
+        '-r',
+        '--root',
+        dest='root_id',
+        action='store',
+        help='Cell ID for root node',
         type=str)
     parser.add_argument(
         '-H',
@@ -258,7 +301,7 @@ def main():
         es_host=args.host,
         es_port=args.port)
 
-    es_loader.load_file(analysis_file=args.gml_file, ordering_file=args.ordering_file)
+    es_loader.load_file(analysis_file=args.gml_file, ordering_file=args.ordering_file, root_id=args.root_id)
 
 
 

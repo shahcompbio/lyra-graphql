@@ -1,9 +1,6 @@
 '''
 Parser/Indexer for segment data in csv format
 
-Created on October 28, 2015
-
-@author: dmachev
 '''
 
 import csv
@@ -27,18 +24,21 @@ class SegsLoader(AnalysisLoader):
     __index_buffer__ = []
     __field_mapping__ = {
         "copy_number": "integer_copy_number",
-        "chrom_number": "chr"
+        "chrom_number": "chr",
+        "integer_median": "median"
     }
 
     __field_types__ = {
         "chrom_number": "str",
         "state": "float",
         "copy_number": "int",
-        "end": "int",
+        "end": "float",
         "integer_median": "float",
         "median": "float",
         "cell_id": "str",
-        "start": "int"
+        "start": "int",
+        "median": "float",
+        "multiplier": "int"
     }
 
     def __init__(
@@ -95,6 +95,7 @@ class SegsLoader(AnalysisLoader):
                     key: self._apply_type(index_record, key)
                     for key in index_record.keys()
                 }
+                #index_record = self._update_state(index_record)
 
                 self._buffer_record(index_record, False)
 
@@ -123,6 +124,15 @@ class SegsLoader(AnalysisLoader):
             index_record['chrom_number'] = _format_chrom_number(
                 str(index_record['chrom_number'])
             )
+        except KeyError:
+            pass
+
+        return index_record
+
+
+    def _update_state(self, index_record):
+        try:
+            index_record['state'] = index_record['state'] - 1
         except KeyError:
             pass
 
@@ -195,8 +205,7 @@ def get_args():
     Argument parser
     '''
     parser = argparse.ArgumentParser(
-        description=('Creates an index in Elasticsearch called published_dashboards_index, ' +
-                     'and loads it with the data contained in the infile.')
+        description=('Creates an index in Elasticsearch called for segments and loads appropriate CSV file')
     )
     required_arguments = parser.add_argument_group("required arguments")
     parser.add_argument(
