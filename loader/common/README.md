@@ -25,16 +25,23 @@ description:  <DESCRIPTION>
 
 ## Tree Loader
 
-The tree loader can take in up to three inputs.
+The tree loader can take in up to four inputs.
 
 ```
 files:
   tree: /exact/path/to/tree.gml
   tree_order: /exact/path/to/tree_order.tsv
   tree_root: <ROOT_ID>
+  tree_edges: /exact/path/to/tree_edges.csv
 ```
 
-### Tree (Required)
+At least one of these must be present to load a rooted tree:
+
+* Rooted tree
+* Unrooted tree with tree root
+* Tree edges
+
+### Tree
 
 A GML file that contains the nodes and edges for the tree structure.
 
@@ -43,7 +50,7 @@ Requirements:
 * Each node must be uniquely labelled
 * Must have only one root
 
-### Tree Order (Optional)
+### Tree Order
 
 A tab-separated file, where each row corresponds to a parent and an array of children. The children are ordered according to the top-to-bottom ordering in the heatmap.
 
@@ -54,9 +61,13 @@ Required columns:
 
 NOTE: If no file is provided, the default ordering is by increasing order of descendants.
 
-### Tree Root (Optional)
+### Tree Root
 
 The ID of the root of the tree. This is only needed if the GML file is undirected. It must correspond to the ID of a node in the GML file.
+
+### Tree Edges
+
+A comma separated file, where each row is an edge from source ID to target ID. Altogether, the tree edges form a directed tree with exactly one root.
 
 ## Segments Loader
 

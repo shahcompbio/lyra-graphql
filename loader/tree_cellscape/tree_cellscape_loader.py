@@ -68,7 +68,8 @@ def load_tree_data(args, yaml_data):
     tree_loader.load_file(
         analysis_file=yaml_data.get_file_paths("tree"),
         ordering_file=yaml_data.get_file_paths("tree_order"),
-        root_id=yaml_data.get_file_paths("tree_root")
+        root_id=yaml_data.get_file_paths("tree_root"),
+        tree_edges=yaml_data.get_file_paths("tree_edges")
     )
 
 def load_segs_data(args, yaml_data):

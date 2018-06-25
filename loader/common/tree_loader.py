@@ -47,7 +47,7 @@ class TreeLoader(AnalysisLoader):
             http_auth=http_auth,
             timeout=timeout)
 
-    def load_file(self, analysis_file=None, ordering_file=None, root_id=None):
+    def load_file(self, analysis_file=None, ordering_file=None, root_id=None, tree_edges=None):
         if self.es_tools.exists_index():
             logging.info('Tree data for analysis already exists - will delete old index')
             self.es_tools.delete_index()
@@ -55,16 +55,20 @@ class TreeLoader(AnalysisLoader):
         self.create_index()
 
         self.disable_index_refresh()
-        tree = self._get_rooted_tree(analysis_file, root_id)
-        ordering = self._get_tree_ordering(ordering_file, tree, root_id)
+        tree = self._get_rooted_tree(analysis_file, root_id, tree_edges)
 
-        self._load_tree_data(tree, ordering)
+        tree_root = self._get_tree_root(tree)
+
+        ordering = self._get_tree_ordering(ordering_file, tree, tree_root)
+
+        self._load_tree_data(tree, ordering, tree_root)
 
         self.enable_index_refresh()
 
 
 
-    def _get_rooted_tree(self, analysis_file, root_id):
+    def _get_rooted_tree(self, analysis_file, root_id, tree_edges):
+        # GML with root name
         if root_id is not None:
             graph = nx.read_gml(analysis_file)
             new_graph = nx.Graph()
@@ -73,15 +77,31 @@ class TreeLoader(AnalysisLoader):
                 new_graph.add_edge(edge[0], edge[1])
 
             tree = nx.dfs_tree(new_graph, root_id)
-        else:
+        # already rooted GML
+        elif analysis_file is not None:
             tree = nx.read_gml(analysis_file)
+        # tree edges
+        else:
+            tree = nx.DiGraph()
+
+            with open(tree_edges) as csv_in:
+                csv_reader = csv.DictReader(csv_in)
+                for row in csv_reader:
+                    tree.add_edge(row['source'].strip(), row['target'].strip())
 
         return tree
 
 
+    def _get_tree_root(self, tree):
+        all_nodes = list(tree.nodes)
+        [tree_root] = [n for n in all_nodes if tree.in_degree(n)==0]
+
+        return tree_root
 
 
-    def _get_tree_ordering(self, ordering_file, tree, root_id):
+
+
+    def _get_tree_ordering(self, ordering_file, tree, tree_root):
 
 
         def _count_descendents(node):
@@ -101,7 +121,7 @@ class TreeLoader(AnalysisLoader):
                     ordering[row[0].strip()] = [child.strip() for child in row[1].split(',')]
 
         else:
-            todo_list = [root_id]
+            todo_list = [tree_root]
 
             while todo_list != []:
                 curr_node = todo_list.pop(0)
@@ -117,10 +137,10 @@ class TreeLoader(AnalysisLoader):
 
         return ordering
 
-    def _load_tree_data(self, tree, ordering):
 
-        all_nodes = list(tree.nodes)
-        [tree_root] = [n for n in all_nodes if tree.in_degree(n)==0]
+
+    def _load_tree_data(self, tree, ordering, tree_root):
+
         todo_list = [[tree_root, 'root']]
         heatmap_index = 0
 
@@ -234,6 +254,13 @@ def get_args():
         help='Cell ID for root node',
         type=str)
     parser.add_argument(
+        '-ed',
+        '--edges',
+        dest='tree_edges',
+        action='store',
+        help='CSV file of tree edges',
+        type=str)
+    parser.add_argument(
         '-H',
         '--host',
         default='localhost',
@@ -301,7 +328,7 @@ def main():
         es_host=args.host,
         es_port=args.port)
 
-    es_loader.load_file(analysis_file=args.gml_file, ordering_file=args.ordering_file, root_id=args.root_id)
+    es_loader.load_file(analysis_file=args.gml_file, ordering_file=args.ordering_file, root_id=args.root_id, tree_edges=args.tree_edges)
 
 
 

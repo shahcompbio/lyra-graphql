@@ -23,15 +23,17 @@ class SegsLoader(AnalysisLoader):
 
     __index_buffer__ = []
     __field_mapping__ = {
-        "copy_number": "integer_copy_number",
+        "state": "copy_number",
+        #"copy_number": "integer_copy_number",
         "chrom_number": "chr",
-        "integer_median": "median"
+        "integer_median": "median",
+        "cell_id": "single_cell_id"
     }
 
     __field_types__ = {
         "chrom_number": "str",
         "state": "float",
-        "copy_number": "int",
+        #"copy_number": "int",
         "end": "float",
         "integer_median": "float",
         "median": "float",
@@ -89,7 +91,11 @@ class SegsLoader(AnalysisLoader):
             csv_reader = csv.DictReader(csv_fh, dialect=self.__csv_dialect__)
 
             for csv_record in csv_reader:
-                index_record = self._update_record_keys(csv_record)
+                index_record = {}
+                for key in csv_record.keys():
+                    index_record[key.strip('\"')] = csv_record[key].strip('\"')
+
+                index_record = self._update_record_keys(index_record)
                 index_record = self._update_chrom_number(index_record)
                 index_record = {
                     key: self._apply_type(index_record, key)
