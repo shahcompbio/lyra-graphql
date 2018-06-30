@@ -1,6 +1,7 @@
 import "babel-polyfill";
 import * as tree from "./tree.js";
 import * as segs from "./segs.js";
+import * as metrics from "./metrics.js";
 import { merge } from "lodash";
 
 import client from "./api/elasticsearch.js";
@@ -101,8 +102,8 @@ const resolvers = {
 };
 
 const server = new ApolloServer({
-  typeDefs: [schema, tree.schema, segs.schema],
-  resolvers: merge(resolvers, tree.resolvers, segs.resolvers)
+  typeDefs: [schema, tree.schema, segs.schema, metrics.schema],
+  resolvers: merge(resolvers, tree.resolvers, segs.resolvers, metrics.resolvers)
 });
 
 const express = require("express");

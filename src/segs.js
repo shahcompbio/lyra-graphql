@@ -18,6 +18,7 @@ export const schema = gql`
   type SegRow {
     id: String!
     index: Int!
+    ploidy: Int!
     segs: [Seg!]!
   }
 
@@ -249,6 +250,30 @@ export const resolvers = {
   SegRow: {
     id: root => root["_source"].cell_id,
     index: root => root["_source"].heatmap_order,
+    ploidy: async root => {
+      const ploidyIndex = root["_index"].replace("_tree", "_qc");
+
+      const isIndexExist = await client.indices.exists({
+        index: ploidyIndex
+      });
+
+      if (isIndexExist) {
+        const results = await client.search({
+          index: ploidyIndex,
+          body: {
+            size: 50000,
+            query: {
+              bool: {
+                filter: [{ term: { cell_id: root["_source"].cell_id } }]
+              }
+            }
+          }
+        });
+
+        return results.hits.hits[0]["_source"]["state_mode"];
+      }
+      return -1;
+    },
     segs: async root => {
       const results = await client.search({
         index: root["_index"].replace("_tree", "_segs"),
