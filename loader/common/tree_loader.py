@@ -79,7 +79,12 @@ class TreeLoader(AnalysisLoader):
             tree = nx.dfs_tree(new_graph, root_id)
         # already rooted GML
         elif analysis_file is not None:
-            tree = nx.read_gml(analysis_file)
+            original_tree = nx.read_gml(analysis_file)
+            tree = nx.DiGraph()
+
+            for edge in original_tree.edges():
+                tree.add_edge(str(edge[0]).strip(), str(edge[1]).strip())
+
         # tree edges
         else:
             tree = nx.DiGraph()
