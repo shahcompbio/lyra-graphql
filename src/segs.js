@@ -270,7 +270,8 @@ export const resolvers = {
           }
         });
 
-        return results.hits.hits[0]["_source"]["state_mode"];
+        const hit = results.hits.hits;
+        return hit.length === 0 ? -1 : hit[0]["_source"]["state_mode"];
       }
       return -1;
     },
