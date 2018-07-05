@@ -38,6 +38,9 @@ class YamlData(object):
         return yaml_data
 
 
+    def has_type(self, key):
+        return key in self['files'].keys()
+
 
     def get_index_name(self, dashboard, type):
         dashboard_code = dashboards.DASHBOARDS[dashboard].lower()

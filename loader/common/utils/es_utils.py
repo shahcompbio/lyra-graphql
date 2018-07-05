@@ -30,12 +30,12 @@ class ElasticSearchTools(object):
     __es_port__ = 0
     __es_id__ = 0
     es = Elasticsearch()
-   
+
     __t0__ = 0.0
     __tb__ = time.time()
-    __slow_query__ = 3.0    #query is slow if it runs longer than this 
+    __slow_query__ = 3.0    #query is slow if it runs longer than this
     __log_interval__ = 10.0 #interval to print logging information
-    
+
     def __init__(self, es_doc_type=None, es_index=None):
         self.__es_doc_type__ = es_doc_type
         self.__es_index__ = es_index
@@ -94,7 +94,7 @@ class ElasticSearchTools(object):
     def init_host(self, host=None, port=None, http_auth=None, timeout=None, use_ssl=False):
         ''' Applies the Elastic search connection settings '''
         if not timeout:
-            timeout = TIMEOUT 
+            timeout = TIMEOUT
         __es_id__ = 0  # reset ID count cause host changed.
         self.es = Elasticsearch(
             [host],
@@ -142,6 +142,19 @@ class ElasticSearchTools(object):
 	    self.slow_query_log(t0,time.time(),query=record_to_insert)
         return res
 
+    def submit_bulk_to_es2(self, records):
+        try:
+            res = helpers.bulk(self.es,
+                            records,
+                            index=self.__es_index__,
+                            doc_type=self.__es_doc_type__)
+
+            logging.info('%d records loaded', res[0])
+            logging.info('%d errors', len(res[1]))
+            return res
+        except Exception as e:
+            logging.error(e)
+
     def submit_bulk_to_es(self, records_to_insert):
         '''
         Adds a group of records to the Elastic search index
@@ -155,14 +168,14 @@ class ElasticSearchTools(object):
         #                 ,self.__t0__-self.__tb__,len(records_to_insert)
         #                 ,self.__es_id__)
         ##debug
-	t0 = time.time()
+    	t0 = time.time()
         res = {}
-	try:
-       	    res = self.es.bulk(
-       	        body=records_to_insert,
-       	        index=self.__es_index__,
-       	        doc_type=self.__es_doc_type__,
-       	        request_timeout=TIMEOUT)
+    	try:
+           	    res = self.es.bulk(
+           	        body=records_to_insert,
+           	        index=self.__es_index__,
+           	        doc_type=self.__es_doc_type__,
+           	        request_timeout=TIMEOUT)
         except Exception as e:
                self.logerr({"error":str(e),"index":self.__es_index__,"doc_type":self.__es_doc_type__
                            ,"body":["records_to_insert ..."],"nrecs":str(len(records_to_insert)/2)})

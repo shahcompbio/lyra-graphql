@@ -14,8 +14,8 @@ import os
 import math
 import __builtin__
 import networkx as nx
+import pandas as pd
 from utils.analysis_loader import AnalysisLoader
-
 
 class SegsLoader(AnalysisLoader):
 
@@ -28,6 +28,11 @@ class SegsLoader(AnalysisLoader):
         "chrom_number": "chr",
         "integer_median": "median",
         "cell_id": "single_cell_id"
+    }
+
+    __field_mapping_c__ = {
+        "median": "integer_median",
+        "chr": "chrom_number"
     }
 
     __field_types__ = {
@@ -60,6 +65,26 @@ class SegsLoader(AnalysisLoader):
             use_ssl=use_ssl,
             http_auth=http_auth,
             timeout=timeout)
+
+
+    def load_h5(self, segs):
+        if not self.es_tools.exists_index():
+            self.create_index()
+
+        segs.columns = self._update_columns(segs.columns.values)
+
+        segs['chrom_number'] = segs['chrom_number'].apply(_format_chrom_number)
+        documents = segs.where((pd.notnull(segs)), None).to_dict(orient='records')
+
+        self.es_tools.submit_bulk_to_es2(documents)
+
+    def _update_columns(self, columns):
+        '''
+        Renames columns attributes as specified in the
+        '__field_mapping__' reference
+        '''
+        return [self.__field_mapping_c__[key] if key in self.__field_mapping_c__.keys() else key for key in columns]
+
 
     def load_file(self, analysis_file=None):
         if not self.es_tools.exists_index():
@@ -298,6 +323,8 @@ def main():
         es_port=args.port)
 
     es_loader.load_file(analysis_file=args.segs_file)
+    #hdf = pd.HDFStore(args.segs_file, 'r')
+    #es_loader.load_h5(hdfile=hdf)
 
 
 

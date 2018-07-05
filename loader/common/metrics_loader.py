@@ -12,6 +12,7 @@ import argparse
 import sys
 import os
 import math
+import pandas as pd
 import __builtin__
 from utils.analysis_loader import AnalysisLoader
 
@@ -23,7 +24,8 @@ class MetricsLoader(AnalysisLoader):
     __index_buffer__ = []
     __field_mapping__ = {
     }
-
+    __field_mapping_c__ = {
+    }
     __field_types__ = {
         "cell_id": "str",
         "state_mode": "int"
@@ -46,6 +48,26 @@ class MetricsLoader(AnalysisLoader):
             use_ssl=use_ssl,
             http_auth=http_auth,
             timeout=timeout)
+
+    def load_h5(self, metrics=None):
+        if not self.es_tools.exists_index():
+            self.create_index()
+
+        metrics.columns = self._update_columns(metrics.columns.values)
+        metrics = metrics.loc[:,['cell_id', 'state_mode']]
+
+        documents = metrics.where((pd.notnull(metrics)), None).to_dict(orient='records')
+
+        self.es_tools.submit_bulk_to_es2(documents)
+
+
+    def _update_columns(self, columns):
+        '''
+        Renames columns attributes as specified in the
+        '__field_mapping__' reference
+        '''
+        return [self.__field_mapping_c__[key] if key in self.__field_mapping_c__.keys() else key for key in columns]
+
 
     def load_file(self, analysis_file=None):
         if not self.es_tools.exists_index():

@@ -1,9 +1,9 @@
 elasticsearch
 certifi
-mock  
-nose  
-coverage  
-pylint  
+mock
+nose
+coverage
+pylint
 nosexcover
 xlrd
 prettytable
@@ -12,3 +12,4 @@ PyIntervalTree
 PyYAML
 PyVCF
 networkx
+pandas
