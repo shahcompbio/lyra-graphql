@@ -34,6 +34,3 @@ deploy:
   - rsync -r $TRAVIS_BUILD_DIR/build/* $DEPLOY_USER@deploy:build/travis
   on:
     branch: master
-ignore:
-  - *.md
-  - loader/*
