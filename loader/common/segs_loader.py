@@ -1,5 +1,5 @@
 '''
-Parser/Indexer for segment data in csv format
+Parser/Indexer for segment data in csv or h5 format
 
 '''
 
@@ -19,18 +19,10 @@ from utils.analysis_loader import AnalysisLoader
 
 class SegsLoader(AnalysisLoader):
 
-    ''' Class TreeLoader '''
+    ''' Class SegsLoader '''
 
-    __index_buffer__ = []
+
     __field_mapping__ = {
-        "state": "copy_number",
-        #"copy_number": "integer_copy_number",
-        "chrom_number": "chr",
-        "integer_median": "median",
-        "cell_id": "single_cell_id"
-    }
-
-    __field_mapping_c__ = {
         "median": "integer_median",
         "chr": "chrom_number"
     }
@@ -67,88 +59,38 @@ class SegsLoader(AnalysisLoader):
             timeout=timeout)
 
 
-    def load_h5(self, segs):
-        if not self.es_tools.exists_index():
-            self.create_index()
+    def load_file(self, analysis_file=None, subpath=None):
+        data = self._read_file(analysis_file, subpath)
+        self._load_segs_table(data)
 
-        segs.columns = self._update_columns(segs.columns.values)
+    def _read_file(self, file, subpath):
+        if file.endswith('.csv'):
+            return pd.read_csv(file)
+            
+        elif file.endswith('.h5'):
+            hdf = pd.HDFStore(file, 'r')
+            return hdf.get(subpath)
 
-        segs['chrom_number'] = segs['chrom_number'].apply(_format_chrom_number)
-        documents = segs.where((pd.notnull(segs)), None).to_dict(orient='records')
-
-        self.es_tools.submit_bulk_to_es2(documents)
 
     def _update_columns(self, columns):
         '''
         Renames columns attributes as specified in the
         '__field_mapping__' reference
         '''
-        return [self.__field_mapping_c__[key] if key in self.__field_mapping_c__.keys() else key for key in columns]
+        return [self.__field_mapping__[key] if key in self.__field_mapping__.keys() else key for key in columns]
 
 
-    def load_file(self, analysis_file=None):
+    def _load_segs_table(self, data):
+        data.columns = self._update_columns(data.columns.values)
+        data['chrom_number'] = data['chrom_number'].apply(_format_chrom_number)
+
         if not self.es_tools.exists_index():
             self.create_index()
 
         self.disable_index_refresh()
-        self._get_csv_dialect(analysis_file)
-        self._load_segs_data(analysis_file)
-
+        self.es_tools.submit_df_to_es(data)
         self.enable_index_refresh()
 
-    def _get_csv_dialect(self, csv_file):
-        '''
-        Gets the CSV file format properties
-        '''
-        try:
-            with open(csv_file) as csv_fh:
-                sniffer = csv.Sniffer()
-                self.__csv_dialect__ = sniffer.sniff(csv_fh.readline())
-                self.__csv_dialect__.quoting = csv.QUOTE_NONE
-        except IOError:
-            logging.error('Unable to parse CSV file.')
-            exit(1)
-
-    def _load_segs_data(self, analysis_file):
-
-        with open(analysis_file) as csv_fh:
-
-            csv_reader = csv.DictReader(csv_fh, dialect=self.__csv_dialect__)
-
-            for csv_record in csv_reader:
-                index_record = {}
-                for key in csv_record.keys():
-                    index_record[key.strip('\"')] = csv_record[key].strip('\"')
-
-                index_record = self._update_record_keys(index_record)
-                index_record = self._update_chrom_number(index_record)
-                index_record = {
-                    key: self._apply_type(index_record, key)
-                    for key in index_record.keys()
-                }
-                #index_record = self._update_state(index_record)
-
-                self._buffer_record(index_record, False)
-
-
-        # Submit any records remaining in the buffer for indexing
-        self._buffer_record(None, True)
-
-
-    def _update_record_keys(self, index_record):
-        '''
-        Renames index record attributes as specified in the
-        '__field_mapping__' reference
-        '''
-        for key in self.__field_mapping__.keys():
-            if self.__field_mapping__[key] in index_record.keys():
-                index_record[key] = index_record[self.__field_mapping__[key]]
-            try:
-                del index_record[self.__field_mapping__[key]]
-            except KeyError:
-                pass
-
-        return index_record
 
     def _update_chrom_number(self, index_record):
         try:
@@ -159,60 +101,6 @@ class SegsLoader(AnalysisLoader):
             pass
 
         return index_record
-
-
-    def _update_state(self, index_record):
-        try:
-            index_record['state'] = index_record['state'] - 1
-        except KeyError:
-            pass
-
-        return index_record
-
-    def _apply_type(self, record, key):
-        '''
-        Attempts to apply the data type associated with this record attribute
-        '''
-        if self._is_empty_value(record, key):
-            return None
-
-        key_type = getattr(__builtin__, self.__field_types__[key])
-        try:
-            return key_type(re.sub(r'"', '', record[key]))
-        except ValueError:
-            # In some cases values in a column with expected integer values
-            # seem to get stored as floats, i.e. '2.0', make sure the error
-            # is not the result of such case
-            return key_type(re.sub(r'\.0$', '', record[key]))
-
-    def _is_empty_value(self, record, key):
-        '''
-        Checks if the record holds an empty value in the specified field
-        '''
-        try:
-            return math.isnan(record[key])
-        except TypeError:
-            pass
-
-        value = str(record[key]).lower()
-        if value in ['na', 'nan', 'inf', '?'] and self.__field_types__[key] != 'str':
-            return True
-
-        return not value.strip()
-
-
-    def _buffer_record(self, index_record, empty_buffer=False):
-        '''
-        Appends records to the buffer and submits them for indexing
-        '''
-        if isinstance(index_record, dict):
-            index_cmd = self.get_index_cmd()
-            self.__index_buffer__.append(index_cmd)
-            self.__index_buffer__.append(index_record)
-
-        if len(self.__index_buffer__) >= self.LOAD_FACTOR or empty_buffer:
-            self.es_tools.submit_bulk_to_es(self.__index_buffer__)
-            self.__index_buffer__ = []
 
 
 def _format_chrom_number(chrom_number):
@@ -252,6 +140,13 @@ def get_args():
         dest='segs_file',
         action='store',
         help='Segs data file',
+        type=str)
+    parser.add_argument(
+        '-sub',
+        '--subpath',
+        dest='subpath',
+        action='store',
+        help='Path to segs file within h5',
         type=str)
     parser.add_argument(
         '-H',
@@ -322,11 +217,7 @@ def main():
         es_host=args.host,
         es_port=args.port)
 
-    es_loader.load_file(analysis_file=args.segs_file)
-    #hdf = pd.HDFStore(args.segs_file, 'r')
-    #es_loader.load_h5(hdfile=hdf)
-
-
+    es_loader.load_file(analysis_file=args.segs_file, subpath=args.subpath)
 
 
 if __name__ == '__main__':

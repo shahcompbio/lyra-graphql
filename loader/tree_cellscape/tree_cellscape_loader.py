@@ -3,7 +3,6 @@ import logging
 import argparse
 import sys
 import os
-import pandas as pd
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from common.analysis_entry_loader import AnalysisEntryLoader
 from common.yaml_data_parser import YamlData
@@ -104,10 +103,9 @@ def load_segs_data(args, yaml_data):
     if h5_files is not None:
         logging.info('Loading H5 data')
         for hdf_paths in h5_files:
-            hdf = pd.HDFStore(hdf_paths['base'], 'r')
-            segs = hdf.get(hdf_paths['segs'])
-            segs_loader.load_h5(
-                segs=segs
+            segs_loader.load_file(
+                analysis_file=hdf_paths['base'],
+                subpath=hdf_paths['segs']
             )
 
 
@@ -143,10 +141,9 @@ def load_metrics_data(args, yaml_data):
     if h5_files is not None:
         logging.info('Loading H5 data')
         for hdf_paths in h5_files:
-            hdf = pd.HDFStore(hdf_paths['base'], 'r')
-            metrics = hdf.get(hdf_paths['metrics'])
-            metrics_loader.load_h5(
-                metrics=metrics
+            metrics_loader.load_file(
+                analysis_file=hdf_paths['base'],
+                subpath=hdf_paths['metrics']
             )
 
 

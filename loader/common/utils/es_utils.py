@@ -16,6 +16,7 @@ from elasticsearch import helpers
 from datetime import datetime
 import traceback
 import json
+import pandas as pd
 
 import time
 import pprint as pp
@@ -142,10 +143,12 @@ class ElasticSearchTools(object):
 	    self.slow_query_log(t0,time.time(),query=record_to_insert)
         return res
 
-    def submit_bulk_to_es2(self, records):
+
+    def submit_df_to_es(self, data):
+        documents = data.where((pd.notnull(data)), None).to_dict(orient='records')
         try:
             res = helpers.bulk(self.es,
-                            records,
+                            documents,
                             index=self.__es_index__,
                             doc_type=self.__es_doc_type__)
 
@@ -154,6 +157,7 @@ class ElasticSearchTools(object):
             return res
         except Exception as e:
             logging.error(e)
+
 
     def submit_bulk_to_es(self, records_to_insert):
         '''

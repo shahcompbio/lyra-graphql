@@ -19,17 +19,15 @@ from utils.analysis_loader import AnalysisLoader
 
 class MetricsLoader(AnalysisLoader):
 
-    ''' Class TreeLoader '''
+    ''' Class MetricsLoader '''
 
-    __index_buffer__ = []
     __field_mapping__ = {
     }
-    __field_mapping_c__ = {
-    }
-    __field_types__ = {
-        "cell_id": "str",
-        "state_mode": "int"
-    }
+    __fields__= [
+        'cell_id',
+        'state_mode'
+    ]
+
 
     def __init__(
             self,
@@ -49,16 +47,33 @@ class MetricsLoader(AnalysisLoader):
             http_auth=http_auth,
             timeout=timeout)
 
-    def load_h5(self, metrics=None):
+
+
+    def load_file(self, analysis_file=None, subpath=None):
+        data = self._read_file(analysis_file, subpath)
+        self._load_metrics_table(data)
+
+
+    def _read_file(self, file, subpath):
+        if file.endswith('.csv'):
+            return pd.read_csv(file)
+
+        elif file.endswith('.h5'):
+            hdf = pd.HDFStore(file, 'r')
+            return hdf.get(subpath)
+
+
+
+    def _load_metrics_table(self, data):
+        data.columns = self._update_columns(data.columns.values)
+        data = data.loc[:, self.__fields__]
+
         if not self.es_tools.exists_index():
             self.create_index()
 
-        metrics.columns = self._update_columns(metrics.columns.values)
-        metrics = metrics.loc[:,['cell_id', 'state_mode']]
-
-        documents = metrics.where((pd.notnull(metrics)), None).to_dict(orient='records')
-
-        self.es_tools.submit_bulk_to_es2(documents)
+        self.disable_index_refresh()
+        self.es_tools.submit_df_to_es(data)
+        self.enable_index_refresh()
 
 
     def _update_columns(self, columns):
@@ -66,110 +81,7 @@ class MetricsLoader(AnalysisLoader):
         Renames columns attributes as specified in the
         '__field_mapping__' reference
         '''
-        return [self.__field_mapping_c__[key] if key in self.__field_mapping_c__.keys() else key for key in columns]
-
-
-    def load_file(self, analysis_file=None):
-        if not self.es_tools.exists_index():
-            self.create_index()
-
-        self.disable_index_refresh()
-        self._get_csv_dialect(analysis_file)
-        self._load_metrics_data(analysis_file)
-
-        self.enable_index_refresh()
-
-    def _get_csv_dialect(self, csv_file):
-        '''
-        Gets the CSV file format properties
-        '''
-        try:
-            with open(csv_file) as csv_fh:
-                sniffer = csv.Sniffer()
-                self.__csv_dialect__ = sniffer.sniff(csv_fh.readline())
-                self.__csv_dialect__.quoting = csv.QUOTE_NONE
-        except IOError:
-            logging.error('Unable to parse CSV file.')
-            exit(1)
-
-    def _load_metrics_data(self, analysis_file):
-        with open(analysis_file) as csv_fh:
-            csv_reader = csv.DictReader(csv_fh, dialect=self.__csv_dialect__)
-
-            for csv_record in csv_reader:
-                index_record = self._update_record_keys(csv_record)
-                index_record = {
-                    key: self._apply_type(index_record, key)
-                    for key in self.__field_types__.keys()
-                }
-
-                self._buffer_record(index_record, False)
-
-        # Submit any records remaining in the buffer for indexing
-        self._buffer_record(None, True)
-
-
-
-    def _update_record_keys(self, index_record):
-        '''
-        Renames index record attributes as specified in the
-        '__field_mapping__' reference
-        '''
-        for key in self.__field_mapping__.keys():
-            if self.__field_mapping__[key] in index_record.keys():
-                index_record[key] = index_record[self.__field_mapping__[key]]
-            try:
-                del index_record[self.__field_mapping__[key]]
-            except KeyError:
-                pass
-
-        return index_record
-
-
-    def _apply_type(self, record, key):
-        '''
-        Attempts to apply the data type associated with this record attribute
-        '''
-        if self._is_empty_value(record, key):
-            return None
-
-        key_type = getattr(__builtin__, self.__field_types__[key])
-        try:
-            return key_type(re.sub(r'"', '', record[key]))
-        except ValueError:
-            # In some cases values in a column with expected integer values
-            # seem to get stored as floats, i.e. '2.0', make sure the error
-            # is not the result of such case
-            return key_type(re.sub(r'\.0$', '', record[key]))
-
-    def _is_empty_value(self, record, key):
-        '''
-        Checks if the record holds an empty value in the specified field
-        '''
-        try:
-            return math.isnan(record[key])
-        except TypeError:
-            pass
-
-        value = str(record[key]).lower()
-        if value in ['na', 'nan', 'inf', '?'] and self.__field_types__[key] != 'str':
-            return True
-
-        return not value.strip()
-
-
-    def _buffer_record(self, index_record, empty_buffer=False):
-        '''
-        Appends records to the buffer and submits them for indexing
-        '''
-        if isinstance(index_record, dict):
-            index_cmd = self.get_index_cmd()
-            self.__index_buffer__.append(index_cmd)
-            self.__index_buffer__.append(index_record)
-
-        if len(self.__index_buffer__) >= self.LOAD_FACTOR or empty_buffer:
-            self.es_tools.submit_bulk_to_es(self.__index_buffer__)
-            self.__index_buffer__ = []
+        return [self.__field_mapping__[key] if key in self.__field_mapping__.keys() else key for key in columns]
 
 
 
@@ -194,6 +106,13 @@ def get_args():
         dest='metrics_file',
         action='store',
         help='Metrics data file',
+        type=str)
+    parser.add_argument(
+        '-sub',
+        '--subpath',
+        dest='subpath',
+        action='store',
+        help='Path to metrics file within h5',
         type=str)
     parser.add_argument(
         '-H',
@@ -264,7 +183,7 @@ def main():
         es_host=args.host,
         es_port=args.port)
 
-    es_loader.load_file(analysis_file=args.metrics_file)
+    es_loader.load_file(analysis_file=args.metrics_file, subpath=args.subpath)
 
 
 

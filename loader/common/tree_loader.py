@@ -20,14 +20,13 @@ import sys
 import math
 import __builtin__
 import networkx as nx
+import pandas as pd
 from utils.analysis_loader import AnalysisLoader
 
 
 class TreeLoader(AnalysisLoader):
 
     ''' Class TreeLoader '''
-
-    __index_buffer__ = []
 
     def __init__(
             self,
@@ -148,6 +147,7 @@ class TreeLoader(AnalysisLoader):
 
         todo_list = [[tree_root, 'root']]
         heatmap_index = 0
+        data = []
 
         while todo_list != []:
             [curr_node, curr_parent] = todo_list.pop(0)
@@ -167,7 +167,7 @@ class TreeLoader(AnalysisLoader):
                     'max_index': heatmap_index + num_successors
                 }
 
-                self._buffer_record(index_record, False)
+                data = data + [index_record]
                 todo_list = [[child, curr_node] for child in curr_children] + todo_list
 
 
@@ -178,19 +178,21 @@ class TreeLoader(AnalysisLoader):
                     'cell_id': curr_node,
                     'parent': curr_parent,
                     'children': [],
-                    'num_successors': 0,
                     'max_height': 0,
                     'min_index': heatmap_index,
                     'max_index': heatmap_index
                 }
-                self._buffer_record(index_record, False)
+
+                data = data + [index_record]
 
 
             heatmap_index += 1
             logging.debug(index_record)
 
         # Submit any records remaining in the buffer for indexing
-        self._buffer_record(None, True)
+
+        data_table = pd.DataFrame(data)
+        self.es_tools.submit_df_to_es(data_table)
 
 
 
@@ -203,21 +205,6 @@ class TreeLoader(AnalysisLoader):
             return path_lengths[node_with_longest_path]
         except KeyError:
             return 0
-
-
-
-    def _buffer_record(self, index_record, empty_buffer=False):
-        '''
-        Appends records to the buffer and submits them for indexing
-        '''
-        if isinstance(index_record, dict):
-            index_cmd = self.get_index_cmd()
-            self.__index_buffer__.append(index_cmd)
-            self.__index_buffer__.append(index_record)
-
-        if len(self.__index_buffer__) >= self.LOAD_FACTOR or empty_buffer:
-            self.es_tools.submit_bulk_to_es(self.__index_buffer__)
-            self.__index_buffer__ = []
 
 
 
