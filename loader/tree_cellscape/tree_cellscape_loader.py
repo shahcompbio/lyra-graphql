@@ -9,7 +9,8 @@ from common.yaml_data_parser import YamlData
 from common.tree_loader import TreeLoader
 from common.segs_loader import SegsLoader
 from common.metrics_loader import MetricsLoader
-
+from common.bins_loader import BinsLoader
+from common.normalize_segs import normalize_segs
 
 dashboard_type = "TREE_CELLSCAPE"
 
@@ -147,6 +148,65 @@ def load_metrics_data(args, yaml_data):
             )
 
 
+def load_bins_data(args, yaml_data):
+    logging.info("")
+    logging.info("")
+    logging.info("==================")
+    logging.info("LOADING BINS DATA")
+    logging.info("==================")
+    index_name = yaml_data.get_index_name(dashboard_type, "bins")
+
+    bins_loader = BinsLoader(
+        es_doc_type=index_name,
+        es_index=index_name,
+        es_host=args.host,
+        es_port=args.port
+    )
+
+    bin_files = yaml_data.get_file_paths('bins')
+    h5_files = yaml_data.get_file_paths('h5')
+
+    has_bin_data = bin_files is not None or h5_files is not None
+
+
+    if has_bin_data:
+        if bins_loader.es_tools.exists_index():
+            logging.info('Bin data for analysis already exists - will delete old index')
+            bins_loader.es_tools.delete_index()
+
+
+    if bin_files is not None:
+        logging.info('Loading CSV tables')
+        for bin_file in bin_files:
+            bins_loader.load_file(
+                analysis_file=bin_file
+            )
+
+
+    if h5_files is not None:
+        logging.info('Loading H5 data')
+        for hdf_paths in h5_files:
+            bins_loader.load_file(
+                analysis_file=hdf_paths['base'],
+                subpath=hdf_paths['bins']
+            )
+
+    if has_bin_data:
+        logging.info("")
+        logging.info("")
+        logging.info("==================")
+        logging.info("NORMALIZING SEGMENT DATA TO MODE")
+        logging.info("==================")
+        norm_segs_index = yaml_data.get_index_name(dashboard_type, "nsegs")
+        norm_segs_loader = SegsLoader(
+            es_doc_type=norm_segs_index,
+            es_index=norm_segs_index,
+            es_host=args.host,
+            es_port=args.port
+        )
+
+        normalize_segs(bins_loader, norm_segs_loader)
+
 
 def get_args():
     '''
@@ -213,6 +273,7 @@ def main():
     load_segs_data(args, yaml_data)
     load_metrics_data(args, yaml_data)
 
+    load_bins_data(args, yaml_data)
 
 
 if __name__ == '__main__':

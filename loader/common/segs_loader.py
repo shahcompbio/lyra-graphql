@@ -27,18 +27,6 @@ class SegsLoader(AnalysisLoader):
         "chr": "chrom_number"
     }
 
-    __field_types__ = {
-        "chrom_number": "str",
-        "state": "float",
-        #"copy_number": "int",
-        "end": "float",
-        "integer_median": "float",
-        "median": "float",
-        "cell_id": "str",
-        "start": "int",
-        "median": "float",
-        "multiplier": "int"
-    }
 
     def __init__(
             self,
@@ -66,7 +54,7 @@ class SegsLoader(AnalysisLoader):
     def _read_file(self, file, subpath):
         if file.endswith('.csv'):
             return pd.read_csv(file)
-            
+
         elif file.endswith('.h5'):
             hdf = pd.HDFStore(file, 'r')
             return hdf.get(subpath)
@@ -90,17 +78,6 @@ class SegsLoader(AnalysisLoader):
         self.disable_index_refresh()
         self.es_tools.submit_df_to_es(data)
         self.enable_index_refresh()
-
-
-    def _update_chrom_number(self, index_record):
-        try:
-            index_record['chrom_number'] = _format_chrom_number(
-                str(index_record['chrom_number'])
-            )
-        except KeyError:
-            pass
-
-        return index_record
 
 
 def _format_chrom_number(chrom_number):

@@ -241,16 +241,14 @@ class ElasticSearchTools(object):
         try:
             #logging.info("idx=%s; tp=%s; %s;",self.__es_index__,self.__es_doc_type__,query) #debug
             res = self.es.search(
-                index=self.__es_index__,
-                doc_type=self.__es_doc_type__,
-                body=query)
-       	except Exception as e:
-	    self.logerr({"error":str(e),"index":es_index,"doc_type":self.__es_doc_type__,"body":query})
-            pass
-        finally:
-            self.slow_query_log(t0,time.time(),index=self.__es_index__
-                               ,query=query,doc_type=self.__es_doc_type__)
+                    index=self.__es_index__,
+                    doc_type=self.__es_doc_type__,
+                    body=query
+                )
+        except Exception as e:
+            logging.error(e)
         return res
+
 
     def search(self, query):
         ''' Performs an index search '''
