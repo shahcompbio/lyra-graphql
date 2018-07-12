@@ -17,6 +17,7 @@ export const schema = gql`
 
   type SegRow {
     id: String!
+    name: String!
     index: Int!
     ploidy: Int!
     segs: [Seg!]!
@@ -104,7 +105,8 @@ export const resolvers = {
   },
 
   SegRow: {
-    id: root => root["_source"].cell_id,
+    id: root => `${root["_source"].cell_id}${root["isNorm"] ? "_norm" : ""}`,
+    name: root => root["_source"].cell_id,
     index: root => root["_source"].heatmap_order,
     ploidy: async root => {
       const ploidyIndex = `ce00_${root["analysis"].toLowerCase()}_qc`;

@@ -5,6 +5,7 @@ import client from "./api/elasticsearch.js";
 export const schema = gql`
   extend type Query {
     hasPloidy(analysis: String!): Boolean
+    hasDiffs(analysis: String!): Boolean
   }
 `;
 
@@ -13,6 +14,13 @@ export const resolvers = {
     async hasPloidy(_, { analysis }) {
       const results = await client.indices.exists({
         index: `ce00_${analysis.toLowerCase()}_qc`
+      });
+
+      return results;
+    },
+    async hasDiffs(_, { analysis }) {
+      const results = await client.indices.exists({
+        index: `ce00_${analysis.toLowerCase()}_nsegs`
       });
 
       return results;
