@@ -5,7 +5,7 @@ import client from "./api/elasticsearch.js";
 export const schema = gql`
   extend type Query {
     chromosomes(analysis: String!): [Chromosome]
-    segs(analysis: String!, indices: [Int!]!): [SegRow]
+    segs(analysis: String!, indices: [Int!]!, isNorm: Boolean!): [SegRow]
     cloneSegs(analysis: String!, range: [Int!]!): [Seg]
   }
 
@@ -27,10 +27,140 @@ export const schema = gql`
     start: Int!
     end: Int!
     state: Int!
-    integerMedian: Float!
   }
 `;
 
+export const resolvers = {
+  Query: {
+    async chromosomes(_, { analysis }) {
+      const results = await client.search({
+        index: `ce00_${analysis.toLowerCase()}_segs`,
+        body: {
+          size: 0,
+          aggs: {
+            chrom_ranges: {
+              terms: {
+                field: "chrom_number",
+                size: 50000,
+                order: {
+                  _key: "asc"
+                }
+              },
+              aggs: {
+                XMax: {
+                  max: {
+                    field: "end"
+                  }
+                },
+                XMin: {
+                  min: {
+                    field: "start"
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      return results.aggregations.chrom_ranges.buckets;
+    },
+
+    async segs(_, { analysis, indices, isNorm }) {
+      const results = await getIDsForIndices(analysis, indices, isNorm);
+
+      return results.hits.hits.map(id => ({ ...id, analysis, isNorm }));
+    },
+
+    async cloneSegs(_, { analysis, range }) {
+      const idResults = await getIDsForRange(analysis, range);
+      const ids = idResults.hits.hits.map(record => record["_source"].cell_id);
+
+      const cloneBins = await client.search({
+        index: `cl00_${analysis.toLowerCase()}_bins`,
+        body: getBinQuery(ids)
+      });
+
+      const results = cloneBins.aggregations.chromosomes.buckets.reduce(
+        (results, chromosome) => [
+          ...results,
+          ...getSegsForChromosome(chromosome.key, chromosome.bins.buckets)
+        ],
+        []
+      );
+
+      const roundedResults = results.map(result => ({
+        ...result,
+        state: Math.round(result.state)
+      }));
+      return results;
+    }
+  },
+
+  Chromosome: {
+    id: root => root.key,
+    start: root => root.XMin.value,
+    end: root => root.XMax.value
+  },
+
+  SegRow: {
+    id: root => root["_source"].cell_id,
+    index: root => root["_source"].heatmap_order,
+    ploidy: async root => {
+      const ploidyIndex = `ce00_${root["analysis"].toLowerCase()}_qc`;
+
+      const isIndexExist = await client.indices.exists({
+        index: ploidyIndex
+      });
+
+      if (isIndexExist) {
+        const results = await client.search({
+          index: ploidyIndex,
+          body: {
+            size: 50000,
+            query: {
+              bool: {
+                filter: [{ term: { cell_id: root["_source"].cell_id } }]
+              }
+            }
+          }
+        });
+
+        const hit = results.hits.hits;
+        return hit.length === 0 ? -1 : hit[0]["_source"]["state_mode"];
+      }
+      return -1;
+    },
+    segs: async root => {
+      const indexEnd = root["isNorm"] ? "nsegs" : "segs";
+
+      const results = await client.search({
+        index: `ce00_${root["analysis"].toLowerCase()}_${indexEnd}`,
+        body: {
+          size: 50000,
+          query: {
+            bool: {
+              filter: [{ term: { cell_id: root["_source"].cell_id } }]
+            }
+          }
+        }
+      });
+
+      return results.hits.hits.map(seg => seg["_source"]);
+    }
+  },
+
+  Seg: {
+    chromosome: root => root.chrom_number,
+    start: root => root.start,
+    end: root => root.end,
+    state: root => root.state
+  }
+};
+
+/*********
+ * Segs
+ **********/
 async function getIDsForIndices(analysis, indices) {
   const results = await client.search({
     index: `ce00_${analysis.toLowerCase()}_tree`,
@@ -60,6 +190,9 @@ async function getIDsForIndices(analysis, indices) {
   return results;
 }
 
+/*********
+ * Clones
+ **********/
 async function getIDsForRange(analysis, range) {
   const results = await client.search({
     index: `ce00_${analysis.toLowerCase()}_tree`,
@@ -173,130 +306,4 @@ const getSegsForChromosome = (id, bins) => {
   });
   const [firstBin, ...restBin] = bins;
   return convertBinsToSegs(convertToSeg(firstBin), [], restBin);
-};
-export const resolvers = {
-  Query: {
-    async chromosomes(_, { analysis }) {
-      const results = await client.search({
-        index: `ce00_${analysis.toLowerCase()}_segs`,
-        body: {
-          size: 0,
-          aggs: {
-            chrom_ranges: {
-              terms: {
-                field: "chrom_number",
-                size: 50000,
-                order: {
-                  _key: "asc"
-                }
-              },
-              aggs: {
-                XMax: {
-                  max: {
-                    field: "end"
-                  }
-                },
-                XMin: {
-                  min: {
-                    field: "start"
-                  }
-                }
-              }
-            }
-          }
-        }
-      });
-
-      return results.aggregations.chrom_ranges.buckets;
-    },
-
-    async segs(_, { analysis, indices }) {
-      const results = await getIDsForIndices(analysis, indices);
-
-      return results.hits.hits;
-    },
-
-    async cloneSegs(_, { analysis, range }) {
-      const idResults = await getIDsForRange(analysis, range);
-      const ids = idResults.hits.hits.map(record => record["_source"].cell_id);
-
-      const cloneBins = await client.search({
-        index: `cl00_${analysis.toLowerCase()}_bins`,
-        body: getBinQuery(ids)
-      });
-
-      const results = cloneBins.aggregations.chromosomes.buckets.reduce(
-        (results, chromosome) => [
-          ...results,
-          ...getSegsForChromosome(chromosome.key, chromosome.bins.buckets)
-        ],
-        []
-      );
-
-      const roundedResults = results.map(result => ({
-        ...result,
-        state: Math.round(result.state)
-      }));
-      return results;
-    }
-  },
-
-  Chromosome: {
-    id: root => root.key,
-    start: root => root.XMin.value,
-    end: root => root.XMax.value
-  },
-
-  SegRow: {
-    id: root => root["_source"].cell_id,
-    index: root => root["_source"].heatmap_order,
-    ploidy: async root => {
-      const ploidyIndex = root["_index"].replace("_tree", "_qc");
-
-      const isIndexExist = await client.indices.exists({
-        index: ploidyIndex
-      });
-
-      if (isIndexExist) {
-        const results = await client.search({
-          index: ploidyIndex,
-          body: {
-            size: 50000,
-            query: {
-              bool: {
-                filter: [{ term: { cell_id: root["_source"].cell_id } }]
-              }
-            }
-          }
-        });
-
-        const hit = results.hits.hits;
-        return hit.length === 0 ? -1 : hit[0]["_source"]["state_mode"];
-      }
-      return -1;
-    },
-    segs: async root => {
-      const results = await client.search({
-        index: root["_index"].replace("_tree", "_segs"),
-        body: {
-          size: 50000,
-          query: {
-            bool: {
-              filter: [{ term: { cell_id: root["_source"].cell_id } }]
-            }
-          }
-        }
-      });
-
-      return results.hits.hits.map(seg => seg["_source"]);
-    }
-  },
-
-  Seg: {
-    chromosome: root => root.chrom_number,
-    start: root => root.start,
-    end: root => root.end,
-    state: root => root.state,
-    integerMedian: root => root.integer_median
-  }
 };

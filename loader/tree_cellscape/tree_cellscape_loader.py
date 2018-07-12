@@ -154,6 +154,11 @@ def load_bins_data(args, yaml_data):
     logging.info("==================")
     logging.info("LOADING BINS DATA")
     logging.info("==================")
+
+    if yaml_data.has_type('skip_bins'):
+        logging.info('Skipping bin load')
+        return
+
     index_name = yaml_data.get_index_name(dashboard_type, "bins")
 
     bins_loader = BinsLoader(

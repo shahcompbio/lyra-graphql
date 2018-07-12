@@ -39,7 +39,7 @@ class YamlData(object):
 
 
     def has_type(self, key):
-        return key in self['files'].keys()
+        return key in self.yaml_data['files']
 
 
     def get_index_name(self, dashboard, type):
