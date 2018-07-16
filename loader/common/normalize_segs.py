@@ -27,6 +27,7 @@ def normalize_segs(bin_index, norm_segs_loader):
     norm_segs_loader._load_segs_table(data_table)
 
 
+
 def _convert_to_segs(bins):
     '''
     Assume sorted by increasing start
@@ -163,6 +164,9 @@ def _get_cell_segs(bin_index, cell_id, mode_bin_map):
     bins = _get_cell_bins(bin_index, cell_id)
     bins = [_diff_bin(bin, mode_bin_map) for bin in bins]
 
+    if len(bins) == 0:
+        return []
+
     segs = _convert_to_segs(bins)
 
     return segs
@@ -179,7 +183,12 @@ def _get_cell_bins(bin_index, cell_id):
                             "value": cell_id
                         }
                     }
-                }]
+                }],
+              "filter": {
+                "exists": {
+                  "field": "state"
+                }
+              }
             }
         },
         "sort": [{
