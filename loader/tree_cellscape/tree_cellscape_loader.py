@@ -272,13 +272,12 @@ def main():
     args = get_args()
     _set_logger_config(args.verbosity)
     yaml_data = YamlData(args.yaml_file)
-    load_analysis_entry(args, yaml_data)
     load_tree_data(args, yaml_data)
 
     load_segs_data(args, yaml_data)
     load_metrics_data(args, yaml_data)
-
     load_bins_data(args, yaml_data)
+    load_analysis_entry(args, yaml_data)
 
 
 if __name__ == '__main__':
