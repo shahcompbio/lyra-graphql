@@ -6,6 +6,7 @@ export const schema = gql`
   extend type Query {
     chromosomes(analysis: String!): [Chromosome]
     segs(analysis: String!, indices: [Int!]!, isNorm: Boolean!): [SegRow]
+    modeSegs(analysis: String!): [Seg]
     cloneSegs(analysis: String!, range: [Int!]!): [Seg]
   }
 
@@ -73,6 +74,14 @@ export const resolvers = {
       return results.hits.hits.map(id => ({ ...id, analysis, isNorm }));
     },
 
+    async modeSegs(_, { analysis }) {
+      const index = `ce00_${analysis.toLowerCase()}_nsegs`;
+
+      const segs = await getSegsForID(index, "all");
+
+      return segs;
+    },
+
     async cloneSegs(_, { analysis, range }) {
       const idResults = await getIDsForRange(analysis, range);
       const ids = idResults.hits.hits.map(record => record["_source"].cell_id);
@@ -135,20 +144,12 @@ export const resolvers = {
     },
     segs: async root => {
       const indexEnd = root["isNorm"] ? "nsegs" : "segs";
+      const index = `ce00_${root["analysis"].toLowerCase()}_${indexEnd}`;
+      const id = root["_source"].cell_id;
 
-      const results = await client.search({
-        index: `ce00_${root["analysis"].toLowerCase()}_${indexEnd}`,
-        body: {
-          size: 50000,
-          query: {
-            bool: {
-              filter: [{ term: { cell_id: root["_source"].cell_id } }]
-            }
-          }
-        }
-      });
+      const segs = await getSegsForID(index, id);
 
-      return results.hits.hits.map(seg => seg["_source"]);
+      return segs;
     }
   },
 
@@ -190,6 +191,22 @@ async function getIDsForIndices(analysis, indices) {
   });
 
   return results;
+}
+
+async function getSegsForID(index, id) {
+  const results = await client.search({
+    index,
+    body: {
+      size: 50000,
+      query: {
+        bool: {
+          filter: [{ term: { cell_id: id } }]
+        }
+      }
+    }
+  });
+
+  return results.hits.hits.map(seg => seg["_source"]);
 }
 
 /*********
