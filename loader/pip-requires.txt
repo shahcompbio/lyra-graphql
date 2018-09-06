@@ -13,3 +13,4 @@ PyYAML
 PyVCF
 networkx
 pandas
+biopython

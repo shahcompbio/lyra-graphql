@@ -21,6 +21,8 @@ import math
 import __builtin__
 import networkx as nx
 import pandas as pd
+
+from Bio import Phylo
 from utils.analysis_loader import AnalysisLoader
 
 
@@ -67,8 +69,20 @@ class TreeLoader(AnalysisLoader):
 
 
     def _get_rooted_tree(self, analysis_file, root_id, tree_edges):
+        # load graph from newick
+        if analysis_file.endswith('.newick'):
+            newick_tree = Phylo.read(analysis_file, 'newick')
+            graph = Phylo.to_networkx(newick_tree)
+
+            new_graph = nx.Graph()
+            for edge in graph.edges():
+                new_graph.add_edge(format_name(str(edge[0]).strip()), format_name(str(edge[1]).strip()))
+
+            tree = nx.dfs_tree(new_graph, 'root')
+
+
         # GML with root name
-        if root_id is not None:
+        elif root_id is not None:
             graph = nx.read_gml(analysis_file)
             new_graph = nx.Graph()
 
@@ -205,6 +219,14 @@ class TreeLoader(AnalysisLoader):
             return path_lengths[node_with_longest_path]
         except KeyError:
             return 0
+
+
+def format_name(str):
+    strs = str.split('_')
+    if strs[0] == 'cell':
+        return strs[1]
+    else:
+        return str
 
 
 
