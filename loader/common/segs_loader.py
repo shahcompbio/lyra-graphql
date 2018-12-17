@@ -23,7 +23,6 @@ class SegsLoader(AnalysisLoader):
 
 
     __field_mapping__ = {
-        "median": "integer_median",
         "chr": "chrom_number"
     }
 
