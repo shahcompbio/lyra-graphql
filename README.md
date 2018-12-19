@@ -1,8 +1,14 @@
 # Lyra
 
-[Lyra](https://github.com/shahcompbio/lyra) is a web-based visualization platform, featuring several interactive dashboards of single cell genomics data.
+Lyra is a web-based visualization dashboard for single-cell phylogeny.
+
+The front-end is written using [React](https://reactjs.org/) and [Redux](https://redux.js.org/), and uses a [GraphQL](https://graphql.org/) and [ElasticSearch](https://www.elastic.co/) backend.
 
 This repo is for the [GraphQL](https://graphql.org/) backend used for Lyra, which features an [Elasticsearch](https://www.elastic.co/) backend. Python scripts are used to load data into Elasticsearch.
+
+## Documentation
+
+All documentation for Lyra can be found on [https://shahcompbio-lyra.netlify.com](https://shahcompbio-lyra.netlify.com).
 
 ## Getting Started
 
@@ -10,13 +16,13 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-* ElasticSearch
-* Python 2.7
-* pip
-* virtualenv
-* yarn or npm
+- ElasticSearch
+- Python 2.7
+- pip
+- virtualenv
+- yarn or npm
 
-### Installing
+### Setting up ElasticSearch
 
 Extract the ElasticSearch archive, and add these to the config/elasticsearch.yml file to enable CORS
 
@@ -25,28 +31,35 @@ http.cors.enabled : true
 http.cors.allow-origin : "*"
 ```
 
-Also install the mapper-size plugin
-
-```
-./bin/elasticsearch-plugin install mapper-size
-```
-
 Then start the ElasticSearch instance
 
 ```
 ./bin/elasticsearch
 ```
 
-Clone the repository and install the necessary dependencies, then start development mode.
+You can verify that this has been set up correctly by `curl http://localhost:9200` and getting this response:
 
 ```
-yarn install
-yarn start
+{
+  "name" : "",
+  "cluster_name" : "",
+  "cluster_uuid" : "RsApHfPNQr2SLTQrC9f9Xg",
+  "version" : {
+    "number" : "6.2.3",
+    "build_hash" : "c59ff00",
+    "build_date" : "2018-03-13T10:06:29.741383Z",
+    "build_snapshot" : false,
+    "lucene_version" : "7.2.1",
+    "minimum_wire_compatibility_version" : "5.6.0",
+    "minimum_index_compatibility_version" : "5.0.0"
+  },
+  "tagline" : "You Know, for Search"
+}
 ```
 
 ### Loading Data
 
-Create a Python virtualenv and install the required packages
+Create a Python 2.7 virtualenv and install the required packages
 
 ```
 virtualenv ~/pythonenv
@@ -60,4 +73,15 @@ Load using the appropriate dashboard loader with the correct YAML file. For exam
 python tree_cellscape_loader.py -y directory/to/yaml/data_metadata.yaml
 ```
 
-This will load an entry into the Analysis index, as well as the appropriate data files. You can view the [README in /loader](./loader/common/README.md) to see more information about the data types.
+This will load an entry into the analysis index, as well as the appropriate data files. You can view the [README in /loader](./loader/common/README.md) to see more information about the data types.
+
+### Setting up graphQL
+
+Clone the [Lyra graphQL](https://github.com/shahcompbio/lyra-graphql) repository and install the necessary dependencies, then start development mode.
+
+```
+yarn install
+yarn start
+```
+
+Following the URL `http://localhost:4000` should bring you to the GraphQL playground, where you can enter queries.
