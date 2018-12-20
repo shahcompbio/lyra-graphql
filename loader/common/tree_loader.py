@@ -167,10 +167,11 @@ class TreeLoader(AnalysisLoader):
             [curr_node, curr_parent] = todo_list.pop(0)
 
             try:
+                
+                curr_node, ordering = self._merge_if_child_is_single_internal_node(curr_node, ordering)
+                
                 curr_children = ordering[curr_node]
 
-                curr_children, todo_list = self._check_if_child_is_single_internal_node(tree, curr_children, todo_list, curr_node, ordering)
-                
                 num_successors = len(nx.descendants(tree, curr_node))
 
                 index_record = {
@@ -225,20 +226,33 @@ class TreeLoader(AnalysisLoader):
 
 
 
-    def _check_if_child_is_single_internal_node(self, tree, curr_children, todo_list, curr_node, ordering):
+    def _merge_if_child_is_single_internal_node(self, curr_node, ordering):
+        curr_children = ordering[curr_node]
+
         # if only one child
-        if len(curr_children) == 1:    
-            # if child is a leaf node
-            if self._get_max_height_from_node(tree, curr_children[0]) == 0:
-                return (curr_children, todo_list)
-            # if child is an internal node
-            else:
-                todo_list = [[child, curr_node] for child in curr_children] + todo_list
-                curr_node = todo_list.pop(0)[0]
-                curr_children = ordering[curr_node]
-                return self._check_if_child_is_single_internal_node(tree, curr_children, todo_list, curr_node, ordering)
+        if len(curr_children) == 1:
+            try:
+                # check if child is a leaf node
+                curr_gchildren = ordering[curr_children[0]]
+                curr_node = curr_children[0]
+                return self._merge_if_child_is_single_internal_node(curr_node, ordering)
+            except KeyError:
+                raise
         else:
-            return (curr_children, todo_list)
+            return (curr_node, ordering)
+
+        # if len(curr_children) == 1:    
+        #     # if child is a leaf node
+        #     if self._get_max_height_from_node(tree, curr_children[0]) == 0:
+        #         return (curr_children, todo_list)
+        #     # if child is an internal node
+        #     else:
+        #         todo_list = [[child, curr_node] for child in curr_children] + todo_list
+        #         curr_node = todo_list.pop(0)[0]
+        #         curr_children = ordering[curr_node]
+        #         return self._check_if_child_is_single_internal_node(tree, curr_children, todo_list, curr_node, ordering)
+        # else:
+        #     return (curr_children, todo_list)
 
 
 
