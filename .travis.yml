@@ -27,7 +27,7 @@ deploy:
   provider: script
   skip_cleanup: true
   script:
-    - rsync -r $TRAVIS_BUILD_DIR/build/* $DEPLOY_USER@deploy:lyra-graphql/lib/
+    - rsync -r $TRAVIS_BUILD_DIR/lib/* $DEPLOY_USER@deploy:lyra-graphql/lib/
     - pm2 restart index
   on:
     branch: master
