@@ -17,6 +17,7 @@ before_deploy:
   - echo -e "Host deploy\n\tHostName $DEPLOY_HOST\n\tIdentityFile /tmp/deploy_rsa\n\tUser
     $DEPLOY_USER\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
   - eval "$(ssh-agent -s)"
+  - ls -la
   - chmod 600 /tmp/deploy_rsa
   - ssh-add /tmp/deploy_rsa
 install:
