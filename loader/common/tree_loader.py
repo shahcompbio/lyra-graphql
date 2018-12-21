@@ -165,21 +165,22 @@ class TreeLoader(AnalysisLoader):
 
         while todo_list != []:
             [curr_node, curr_parent] = todo_list.pop(0)
-
-            try:
+            max_height = self._get_max_height_from_node(tree, curr_node)
+            
+            if max_height != 0:
                 
-                curr_node, ordering = self._merge_if_child_is_single_internal_node(curr_node, ordering)
-                
-                curr_children = ordering[curr_node]
-
                 num_successors = len(nx.descendants(tree, curr_node))
+
+                curr_node, ordering = self._merge_if_child_is_single_internal_node(curr_node, ordering)
+
+                curr_children = ordering[curr_node]
 
                 index_record = {
                     'heatmap_order': heatmap_index,
                     'cell_id': curr_node,
                     'parent': curr_parent,
                     'children': curr_children,
-                    'max_height': self._get_max_height_from_node(tree, curr_node),
+                    'max_height': max_height,
                     'min_index': heatmap_index,
                     'max_index': heatmap_index + num_successors
                 }
@@ -188,7 +189,7 @@ class TreeLoader(AnalysisLoader):
                 todo_list = [[child, curr_node] for child in curr_children] + todo_list
 
 
-            except KeyError: #is leaf node
+            else: #is leaf node
                 curr_children = []
                 index_record = {
                     'heatmap_order': heatmap_index,
@@ -234,11 +235,12 @@ class TreeLoader(AnalysisLoader):
             try:
                 # check if child is a leaf node
                 curr_gchildren = ordering[curr_children[0]]
+                # if not, merge node and its single child
                 curr_node = curr_node + ", " + curr_children[0]
                 ordering[curr_node] = curr_gchildren
                 return self._merge_if_child_is_single_internal_node(curr_node, ordering)
             except KeyError:
-                raise
+                return (curr_node, ordering)
         else:
             return (curr_node, ordering)
 
