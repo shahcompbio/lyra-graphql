@@ -234,7 +234,8 @@ class TreeLoader(AnalysisLoader):
             try:
                 # check if child is a leaf node
                 curr_gchildren = ordering[curr_children[0]]
-                curr_node = curr_children[0]
+                curr_node = curr_node + ", " + curr_children[0]
+                ordering[curr_node] = curr_gchildren
                 return self._merge_if_child_is_single_internal_node(curr_node, ordering)
             except KeyError:
                 raise
