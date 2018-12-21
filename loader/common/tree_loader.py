@@ -241,19 +241,6 @@ class TreeLoader(AnalysisLoader):
         else:
             return (curr_node, ordering)
 
-        # if len(curr_children) == 1:    
-        #     # if child is a leaf node
-        #     if self._get_max_height_from_node(tree, curr_children[0]) == 0:
-        #         return (curr_children, todo_list)
-        #     # if child is an internal node
-        #     else:
-        #         todo_list = [[child, curr_node] for child in curr_children] + todo_list
-        #         curr_node = todo_list.pop(0)[0]
-        #         curr_children = ordering[curr_node]
-        #         return self._check_if_child_is_single_internal_node(tree, curr_children, todo_list, curr_node, ordering)
-        # else:
-        #     return (curr_children, todo_list)
-
 
 
 def format_name(str):
