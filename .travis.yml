@@ -24,8 +24,6 @@ install:
 script:
   - npm run build
   - pwd
-  - pm2 ls
-  - pm2 restart index
 after_deploy:
   - ssh $DEPLOY_USER@deploy ./build/loadBuild.sh
 deploy:
@@ -33,6 +31,7 @@ deploy:
   skip_cleanup: true
   script:
     - rsync -r $TRAVIS_BUILD_DIR/lib/* $DEPLOY_USER@deploy:lyra-graphql/lib/
+    - ls -la
     - pm2 restart index
   on:
     branch: master
