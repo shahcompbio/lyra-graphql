@@ -23,6 +23,11 @@ install:
   - npm install --save
 script:
   - npm run build
+  - pwd
+  - pm2 ls
+  - pm2 restart index
+after_deploy:
+  - ssh $DEPLOY_USER@deploy ./build/loadBuild.sh
 deploy:
   provider: script
   skip_cleanup: true
