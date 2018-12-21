@@ -23,14 +23,11 @@ install:
   - npm install --save
 script:
   - npm run build
-  - pm2 ls
-  - pm2 restart index
-after_deploy:
-  - ssh $DEPLOY_USER@deploy ./build/loadBuild.sh
 deploy:
   provider: script
   skip_cleanup: true
   script:
-    - rsync -r $TRAVIS_BUILD_DIR/build/* $DEPLOY_USER@deploy:build/travis
+    - rsync -r $TRAVIS_BUILD_DIR/build/* $DEPLOY_USER@deploy:lyra-graphql/lib/
+    - pm2 restart index
   on:
     branch: master
