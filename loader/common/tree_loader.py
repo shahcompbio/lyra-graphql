@@ -165,6 +165,7 @@ class TreeLoader(AnalysisLoader):
 
         while todo_list != []:
             [curr_node, curr_parent] = todo_list.pop(0)
+            unmerged_id = curr_node
             max_height = self._get_max_height_from_node(tree, curr_node)
             
             if max_height != 0:
@@ -178,6 +179,7 @@ class TreeLoader(AnalysisLoader):
                 index_record = {
                     'heatmap_order': heatmap_index,
                     'cell_id': curr_node,
+                    'unmerged_id': unmerged_id,
                     'parent': curr_parent,
                     'children': curr_children,
                     'max_height': max_height,
@@ -194,6 +196,7 @@ class TreeLoader(AnalysisLoader):
                 index_record = {
                     'heatmap_order': heatmap_index,
                     'cell_id': curr_node,
+                    'unmerged_id': unmerged_id,
                     'parent': curr_parent,
                     'children': [],
                     'max_height': 0,

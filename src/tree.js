@@ -109,7 +109,7 @@ export const resolvers = {
             size: 1,
             query: {
               bool: {
-                filter: [{ term: { cell_id: child } }]
+                filter: [{ term: { unmerged_id: child } }]
               }
             }
           }
