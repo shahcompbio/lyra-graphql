@@ -172,13 +172,15 @@ class TreeLoader(AnalysisLoader):
                 
                 num_successors = len(nx.descendants(tree, curr_node))
 
-                curr_node, ordering = self._merge_if_child_is_single_internal_node(curr_node, ordering)
+                node_list = [curr_node]
+
+                curr_node, node_list, ordering = self._merge_if_child_is_single_internal_node(curr_node, node_list, ordering)
 
                 curr_children = ordering[curr_node]
 
                 index_record = {
                     'heatmap_order': heatmap_index,
-                    'cell_id': curr_node,
+                    'cell_id': node_list,
                     'unmerged_id': unmerged_id,
                     'parent': curr_parent,
                     'children': curr_children,
@@ -190,12 +192,11 @@ class TreeLoader(AnalysisLoader):
                 data = data + [index_record]
                 todo_list = [[child, curr_node] for child in curr_children] + todo_list
 
-
             else: #is leaf node
                 curr_children = []
                 index_record = {
                     'heatmap_order': heatmap_index,
-                    'cell_id': curr_node,
+                    'cell_id': [curr_node],
                     'unmerged_id': unmerged_id,
                     'parent': curr_parent,
                     'children': [],
@@ -230,7 +231,7 @@ class TreeLoader(AnalysisLoader):
 
 
 
-    def _merge_if_child_is_single_internal_node(self, curr_node, ordering):
+    def _merge_if_child_is_single_internal_node(self, curr_node, node_list, ordering):
         curr_children = ordering[curr_node]
 
         # if only one child
@@ -240,12 +241,13 @@ class TreeLoader(AnalysisLoader):
                 curr_gchildren = ordering[curr_children[0]]
                 # if not, merge node and its single child
                 curr_node = curr_node + ", " + curr_children[0]
+                node_list.append(curr_children[0])
                 ordering[curr_node] = curr_gchildren
-                return self._merge_if_child_is_single_internal_node(curr_node, ordering)
+                return self._merge_if_child_is_single_internal_node(curr_node, node_list, ordering)
             except KeyError:
-                return (curr_node, ordering)
+                return (curr_node, node_list, ordering)
         else:
-            return (curr_node, ordering)
+            return (curr_node, node_list, ordering)
 
 
 
