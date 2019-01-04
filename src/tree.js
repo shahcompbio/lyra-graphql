@@ -19,7 +19,7 @@ export const schema = gql`
   }
 
   type NodeChild {
-    id: [String]!
+    id: String!
     index: Int!
     maxIndex: Int!
     maxHeight: Int!
@@ -96,7 +96,7 @@ export const resolvers = {
     }
   },
   Node: {
-    id: root => root["_source"].cell_id,
+    id: root => root["_source"].cell_id.split(",").map(item => item.trim()),
     parent: root => root["_source"].parent,
     index: root => root["_source"].heatmap_order,
     maxIndex: root => root["_source"].max_index,
