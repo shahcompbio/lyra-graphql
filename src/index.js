@@ -8,7 +8,7 @@ import client from "./api/elasticsearch.js";
 
 const { ApolloServer, gql } = require("apollo-server");
 
-const schema = gql`
+export const schema = gql`
   type Query {
     dashboards: [Dashboard!]!
     analysis(analysis: String!, dashboard: String!): Analysis
@@ -32,7 +32,7 @@ const allAnalysisQuery = () => ({
   size: 50000
 });
 
-const resolvers = {
+export const resolvers = {
   Query: {
     async dashboards() {
       const results = await client.search({
@@ -103,7 +103,13 @@ const resolvers = {
 
 const server = new ApolloServer({
   typeDefs: [schema, tree.schema, segs.schema, metrics.schema],
-  resolvers: merge(resolvers, tree.resolvers, segs.resolvers, metrics.resolvers)
+  resolvers: merge(
+    resolvers,
+    tree.resolvers,
+    segs.resolvers,
+    metrics.resolvers
+  ),
+  mocks: true
 });
 
 const express = require("express");
