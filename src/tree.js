@@ -10,7 +10,7 @@ export const schema = gql`
   }
 
   type Node {
-    id: [String]!
+    id: [String!]!
     parent: String!
     index: Int!
     maxIndex: Int!
