@@ -24,6 +24,10 @@
   },
   "scripts": {
     "build": "babel src -d lib",
-    "start": "nodemon src/index.js --exec babel-node --presets es2015,stage-2"
+    "start": "nodemon src/index.js --exec babel-node --presets es2015,stage-2",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^23.6.0"
   }
 }
