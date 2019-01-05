@@ -5,7 +5,7 @@ import * as metrics from "./metrics.js";
 import * as analysis from "./analysis.js";
 import { merge } from "lodash";
 
-const { ApolloServer } = require("apollo-server");
+const { ApolloServer } = require("apollo-server-express");
 
 const server = new ApolloServer({
   typeDefs: [analysis.schema, tree.schema, segs.schema, metrics.schema],
@@ -18,8 +18,9 @@ const server = new ApolloServer({
 });
 
 const express = require("express");
-const { registerServer } = require("apollo-server-express");
 const app = express();
-registerServer({ server, app, path: "/graphql" });
+server.applyMiddleware({ app });
 
-server.listen().then(({ url }) => console.log(`Server is running on ${url}`));
+app.listen({ port: 4000 }, () =>
+  console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
+);
