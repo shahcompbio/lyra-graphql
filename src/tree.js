@@ -26,6 +26,8 @@ export const schema = gql`
   }
 `;
 
+const formatIDStringToList = (idStr) => idStr.split(",").map(item => item.trim());
+
 export const resolvers = {
   Query: {
     async treeRoot(_, { analysis }) {
@@ -96,7 +98,7 @@ export const resolvers = {
     }
   },
   Node: {
-    id: root => root["_source"].cell_id.split(",").map(item => item.trim()),
+    id: root => formatIDStringToList(root["_source"].cell_id),
     parent: root => root["_source"].parent,
     index: root => root["_source"].heatmap_order,
     maxIndex: root => root["_source"].max_index,
@@ -120,7 +122,7 @@ export const resolvers = {
   },
 
   NodeChild: {
-    id: root => root.cell_id.split(",").map(item => item.trim()),
+    id: root => formatIDStringToList(root.cell_id),
     index: root => root.heatmap_order,
     maxIndex: root => root.max_index,
     maxHeight: root => root.max_height
