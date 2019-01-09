@@ -5,7 +5,7 @@ import client from "./api/elasticsearch.js";
 export const schema = gql`
   extend type Query {
     treeRoot(analysis: String!): Node
-    treeNode(analysis: String!, id: String, index: Int): Node
+    treeNode(analysis: String!, id: [String!], index: Int): Node
     treeNodes(analysis: String!, range: [Int!]!): [Node]
   }
 
@@ -19,7 +19,7 @@ export const schema = gql`
   }
 
   type NodeChild {
-    id: String!
+    id: [String!]!
     index: Int!
     maxIndex: Int!
     maxHeight: Int!
@@ -45,7 +45,7 @@ export const resolvers = {
     },
 
     async treeNode(_, { analysis, id, index }) {
-      const term = id ? { cell_id: id } : { heatmap_order: index };
+      const term = id ? { unmerged_id: id[0] } : { heatmap_order: index };
 
       const results = await client.search({
         index: `ce00_${analysis.toLowerCase()}_tree`,
@@ -120,7 +120,7 @@ export const resolvers = {
   },
 
   NodeChild: {
-    id: root => root.cell_id,
+    id: root => root.cell_id.split(",").map(item => item.trim()),
     index: root => root.heatmap_order,
     maxIndex: root => root.max_index,
     maxHeight: root => root.max_height
