@@ -1,22 +1,20 @@
 import "babel-polyfill";
 
-const { ApolloServer } = require("apollo-server-express");
+const { ApolloServer } = require("apollo-server");
+const { createTestClient } = require("apollo-server-testing");
+const { MockList } = require("apollo-server");
 
-const express = require("express");
+const mocks = {
+  Query: () => ({
+    dashboards: () => new MockList([1, 3])
+  })
+};
 
 export async function startServer(schema) {
   const server = await new ApolloServer({
     typeDefs: schema,
-    mock: true
+    mocks
   });
 
-  const app = express();
-  await server.applyMiddleware({ app });
-  return await app.listen({ port: 4000 }, () =>
-    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
-  );
+  return createTestClient(server);
 }
-
-export const stopServer = server => {
-  server.close();
-};
