@@ -65,6 +65,7 @@ class BinsLoader(AnalysisLoader):
 
     def load_file(self, analysis_file=None, subpath=None):
         data = self._read_file(analysis_file, subpath)
+        data = self._transform_data(data)
         self._load_bin_data(data)
 
 
@@ -76,19 +77,16 @@ class BinsLoader(AnalysisLoader):
             hdf = pd.HDFStore(file, 'r')
             return hdf.get(subpath)
 
-
-    def _update_columns(self, columns):
-        '''
-        Renames columns attributes as specified in the
-        '__field_mapping__' reference
-        '''
-        return [self.__field_mapping__[key] if key in self.__field_mapping__.keys() else key for key in columns]
-
-
-    def _load_bin_data(self, data):
+    def _transform_data(self, data):
         data.columns = self._update_columns(data.columns.values)
         data['chrom_number'] = data['chrom_number'].apply(_format_chrom_number)
         data = data.loc[:, self.__fields__]
+        return data
+
+
+
+
+    def _load_bin_data(self, data):
 
         if not self.es_tools.exists_index():
             self.create_index()
@@ -98,6 +96,12 @@ class BinsLoader(AnalysisLoader):
         self.enable_index_refresh()
 
 
+    def _update_columns(self, columns):
+        '''
+        Renames columns attributes as specified in the
+        '__field_mapping__' reference
+        '''
+        return [self.__field_mapping__[key] if key in self.__field_mapping__.keys() else key for key in columns]
 
     def _update_record_keys(self, index_record):
         '''

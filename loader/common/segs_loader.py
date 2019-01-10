@@ -48,7 +48,9 @@ class SegsLoader(AnalysisLoader):
 
     def load_file(self, analysis_file=None, subpath=None):
         data = self._read_file(analysis_file, subpath)
+        data = self._transform_data(data)
         self._load_segs_table(data)
+
 
     def _read_file(self, file, subpath):
         if file.endswith('.csv'):
@@ -58,19 +60,15 @@ class SegsLoader(AnalysisLoader):
             hdf = pd.HDFStore(file, 'r')
             return hdf.get(subpath)
 
-
-    def _update_columns(self, columns):
-        '''
-        Renames columns attributes as specified in the
-        '__field_mapping__' reference
-        '''
-        return [self.__field_mapping__[key] if key in self.__field_mapping__.keys() else key for key in columns]
-
-
-    def _load_segs_table(self, data):
+    def _transform_data(self, data):
         data.columns = self._update_columns(data.columns.values)
         data['chrom_number'] = data['chrom_number'].apply(_format_chrom_number)
 
+        return data
+
+
+
+    def _load_segs_table(self, data):
         if not self.es_tools.exists_index():
             self.create_index()
 
@@ -78,6 +76,13 @@ class SegsLoader(AnalysisLoader):
         self.es_tools.submit_df_to_es(data)
         self.enable_index_refresh()
 
+
+    def _update_columns(self, columns):
+        '''
+        Renames columns attributes as specified in the
+        '__field_mapping__' reference
+        '''
+        return [self.__field_mapping__[key] if key in self.__field_mapping__.keys() else key for key in columns]
 
 def _format_chrom_number(chrom_number):
     '''
