@@ -52,7 +52,7 @@ class SegsLoader(AnalysisLoader):
         self._load_segs_table(data)
 
 
-    def _read_file(self, file, subpath):
+    def _read_file(self, file, subpath=None):
         if file.endswith('.csv'):
             return pd.read_csv(file)
 
@@ -88,6 +88,7 @@ def _format_chrom_number(chrom_number):
     '''
     Formats the index record chrom_number field
     '''
+    chrom_number = str(chrom_number)
     convert_chrom = {"23": 'X', "24": 'Y'}
 
     if str(chrom_number) in convert_chrom.keys():
