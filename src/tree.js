@@ -26,7 +26,9 @@ export const schema = gql`
   }
 `;
 
-const formatIDStringToList = (idStr) => idStr.split(",").map(item => item.trim());
+const formatIdStringToList = (idStr) => idStr.split(",").map(item => item.trim());
+
+const getHeatmapIndex = (record) => record.hasOwnProperty("heatmap_order") ? record.heatmap_order : record.min_index;
 
 export const resolvers = {
   Query: {
@@ -47,7 +49,7 @@ export const resolvers = {
     },
 
     async treeNode(_, { analysis, id, index }) {
-      const term = id ? { unmerged_id: id[0] } : { heatmap_order: index };
+      const term = id ? { unmerged_id: id[0] } : { min_index: index };
 
       const results = await client.search({
         index: `ce00_${analysis.toLowerCase()}_tree`,
@@ -98,9 +100,9 @@ export const resolvers = {
     }
   },
   Node: {
-    id: root => formatIDStringToList(root["_source"].cell_id),
+    id: root => formatIdStringToList(root["_source"].cell_id),
     parent: root => root["_source"].parent,
-    index: root => root["_source"].heatmap_order,
+    index: root => getHeatmapIndex(root["_source"]),
     maxIndex: root => root["_source"].max_index,
     maxHeight: root => root["_source"].max_height,
     children: root => {
@@ -122,8 +124,8 @@ export const resolvers = {
   },
 
   NodeChild: {
-    id: root => formatIDStringToList(root.cell_id),
-    index: root => root.heatmap_order,
+    id: root => formatIdStringToList(root.cell_id),
+    index: root => getHeatmapIndex(root),
     maxIndex: root => root.max_index,
     maxHeight: root => root.max_height
   }

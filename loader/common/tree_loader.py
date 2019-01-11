@@ -23,6 +23,7 @@ import networkx as nx
 import pandas as pd
 
 from Bio import Phylo
+from networkx.algorithms.traversal.depth_first_search import dfs_tree
 from utils.analysis_loader import AnalysisLoader
 
 
@@ -169,22 +170,21 @@ class TreeLoader(AnalysisLoader):
             max_height = self._get_max_height_from_node(tree, curr_node)
             
             if max_height != 0:
-                
-                num_successors = len(nx.descendants(tree, curr_node))
+
+                num_leaf_descendants = self._get_number_of_leaf_descendants(curr_node, tree)
 
                 curr_node, ordering = self._merge_if_child_is_single_internal_node(curr_node, ordering)
 
                 curr_children = ordering[curr_node]
 
                 index_record = {
-                    'heatmap_order': heatmap_index,
                     'cell_id': curr_node,
                     'unmerged_id': unmerged_id,
                     'parent': curr_parent,
                     'children': curr_children,
                     'max_height': max_height,
                     'min_index': heatmap_index,
-                    'max_index': heatmap_index + num_successors
+                    'max_index': heatmap_index + num_leaf_descendants - 1
                 }
 
                 data = data + [index_record]
@@ -205,9 +205,9 @@ class TreeLoader(AnalysisLoader):
                 }
 
                 data = data + [index_record]
+                heatmap_index += 1
 
 
-            heatmap_index += 1
             logging.debug(index_record)
 
         # Submit any records remaining in the buffer for indexing
@@ -246,6 +246,14 @@ class TreeLoader(AnalysisLoader):
                 return (curr_node, ordering)
         else:
             return (curr_node, ordering)
+
+
+
+
+    def _get_number_of_leaf_descendants(self, curr_node, tree):
+        subtree = dfs_tree(tree, curr_node)
+        sub_nodes = list(subtree.nodes)
+        return len([n for n in sub_nodes if subtree.out_degree(n)==0])
 
 
 
