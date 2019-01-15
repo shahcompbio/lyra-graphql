@@ -19,7 +19,7 @@ jobs:
         - docker container ls
         - netstat -an|grep LISTEN
       install:
-        - pip install -r pip-requires.txt
+        - pip install --user -r pip-requires.txt
       script:
         - pwd
         - pytest
