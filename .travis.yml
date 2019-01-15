@@ -10,6 +10,12 @@ jobs:
     - stage: tests
       language: python
       python: "2.7"
+      services:
+        - docker
+      before_install:
+        - cd loader
+        - docker build --tag=elasticsearchtest
+        - docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
       install:
         - cd loader
         - pip install -r pip-requires.txt
@@ -22,7 +28,6 @@ jobs:
       cache: yarn
       script:
         - pwd
-        - yarn test
     - stage: deploy
       language: node_js
       node_js: stable
