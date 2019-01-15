@@ -15,7 +15,7 @@ jobs:
         - pip install -r pip-requires.txt
       script:
         - pwd
-        - python -m pytest tests
+        - python -m pytest test
     - stage: tests
       language: node_js
       node_js: stable
