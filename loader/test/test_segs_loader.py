@@ -4,6 +4,8 @@ import pandas as pd
 from common.segs_loader import SegsLoader
 
 CSV_FILE = 'example/segs_data.csv'
+H5_FILE = 'example/segs_data.h5'
+H5_SUBPATH = '/example/seg/path'
 
 
 @pytest.fixture
@@ -21,6 +23,10 @@ def test_init(segs_loader):
 
 def test_read_file_csv(segs_loader):
     data = segs_loader._read_file(CSV_FILE)
+    assert isinstance(data, pd.DataFrame)
+
+def test_read_file_h5(segs_loader):
+    data = segs_loader._read_file(H5_FILE, H5_SUBPATH)
     assert isinstance(data, pd.DataFrame)
 
 def test_transform_data(segs_loader):
