@@ -15,12 +15,13 @@ jobs:
         - pip install -r pip-requires.txt
       script:
         - pwd
-        - pytest
+        - python -m pytest tests
     - stage: tests
       language: node_js
       node_js: stable
       cache: yarn
       script:
+        - pwd
         - yarn test
     - stage: deploy
       language: node_js
