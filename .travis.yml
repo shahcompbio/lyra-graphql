@@ -22,7 +22,7 @@ jobs:
         - pip install -r pip-requires.txt
       script:
         - pwd
-        - travis_wait python -m pytest test
+        - pytest
     - stage: tests
       language: node_js
       node_js: stable
