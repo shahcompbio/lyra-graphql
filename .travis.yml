@@ -14,10 +14,11 @@ jobs:
         - docker
       before_install:
         - cd loader
+        - curl http://0.0.0.0:9200
         - docker build --tag=elasticsearchtest .
         - docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
         - docker container ls
-        - curl http://127.0.0.1:9200
+        - curl http://0.0.0.0:9200
       install:
         - pip install -r pip-requires.txt
       script:
