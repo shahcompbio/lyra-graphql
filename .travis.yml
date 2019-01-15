@@ -14,7 +14,7 @@ jobs:
         - docker
       before_install:
         - cd loader
-        - docker build --tag=elasticsearchtest
+        - docker build --tag=elasticsearchtest .
         - docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
       install:
         - cd loader
