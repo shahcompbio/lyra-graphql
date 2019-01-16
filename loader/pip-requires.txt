@@ -15,4 +15,3 @@ networkx
 pandas
 biopython
 pytest-mock
-pytest
