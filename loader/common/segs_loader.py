@@ -57,9 +57,7 @@ class SegsLoader(AnalysisLoader):
             return pd.read_csv(file)
 
         elif file.endswith('.h5'):
-            print("first line")
             hdf = pd.HDFStore(file, 'r')
-            print("second line")
             return hdf.get(subpath)
 
     def _transform_data(self, data):
