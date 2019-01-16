@@ -247,9 +247,8 @@ class TreeLoader(AnalysisLoader):
 
 
     def _get_number_of_leaf_descendants(self, curr_node, tree):
-        subtree = dfs_tree(tree, curr_node)
-        sub_nodes = list(subtree.nodes)
-        return len([n for n in sub_nodes if subtree.out_degree(n)==0])
+        sub_nodes = list(nx.descendants(tree, curr_node))
+        return len([n for n in sub_nodes if tree.out_degree(n)==0])
 
 
 
