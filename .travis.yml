@@ -1,34 +1,68 @@
 sudo: required
-language: node_js
-node_js: stable
-cache: yarn
 dist: trusty
-addons:
-  ssh_known_hosts: "$DEPLOY_HOST"
-before_script:
-  - npm install pm2 -g
-before_install:
-  - openssl aes-256-cbc -K $encrypted_531226d110e9_key -iv $encrypted_531226d110e9_iv -in deploy_rsa.enc -out /tmp/deploy_rsa -d
-  - pwd
-  - ls -la
-after_install:
-  - yarn test
-before_deploy:
-  - echo -e "Host deploy\n\tHostName $DEPLOY_HOST\n\tIdentityFile /tmp/deploy_rsa\n\tUser
-    $DEPLOY_USER\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-  - eval "$(ssh-agent -s)"
-  - chmod 600 /tmp/deploy_rsa
-  - ssh-add /tmp/deploy_rsa
-install:
-  - npm install --save
-script:
-  - npm run build
-after_deploy:
-  - ssh $DEPLOY_USER@deploy 'pm2 restart index'
-deploy:
-  provider: script
-  skip_cleanup: true
-  script:
-    - rsync -r $TRAVIS_BUILD_DIR/lib/* $DEPLOY_USER@deploy:lyra-graphql/lib/
-  on:
-    branch: master
+
+stages:
+  - tests
+  - deploy
+
+jobs:
+  include:
+    - stage: tests
+      language: python
+      python: "2.7"
+      services:
+        - docker
+      before_install:
+        - cd loader
+        - docker --version
+        - sudo apt-get update
+        - sudo apt-get install docker-ce
+        - docker --version
+        - docker build --tag=elasticsearchtest .
+        - docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
+        - docker container ls
+        - sleep 30
+        - curl http://0.0.0.0:9200
+      install:
+        - pip install -r pip-requires.txt
+        - pip install --upgrade pytest
+      script:
+        - pwd
+        - python -m pytest test -v -s
+    - stage: tests
+      language: node_js
+      node_js: stable
+      cache: yarn
+      script:
+        - pwd
+    - stage: deploy
+      language: node_js
+      node_js: stable
+      cache: yarn
+      addons:
+        ssh_known_hosts: "$DEPLOY_HOST"
+      before_script:
+        - npm install pm2 -g
+      before_install:
+        - openssl aes-256-cbc -K $encrypted_531226d110e9_key -iv $encrypted_531226d110e9_iv -in deploy_rsa.enc -out /tmp/deploy_rsa -d
+        - pwd
+        - ls -la
+      before_deploy:
+        - echo -e "Host deploy\n\tHostName $DEPLOY_HOST\n\tIdentityFile /tmp/deploy_rsa\n\tUser
+          $DEPLOY_USER\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+        - eval "$(ssh-agent -s)"
+        - chmod 600 /tmp/deploy_rsa
+        - ssh-add /tmp/deploy_rsa
+      install:
+        - npm install --save
+      script:
+        - npm run build
+      after_deploy:
+        - ssh $DEPLOY_USER@deploy 'pm2 restart index'
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - rsync -r $TRAVIS_BUILD_DIR/lib/* $DEPLOY_USER@deploy:lyra-graphql/lib/
+        on:
+          branch: master

@@ -14,3 +14,4 @@ PyVCF
 networkx
 pandas
 biopython
+pytest-mock
