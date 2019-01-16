@@ -48,12 +48,11 @@ def test_load_segs_table(segs_loader):
     segs_loader.es_tools.exists_index.assert_called_once_with()
     segs_loader.es_tools.submit_df_to_es.assert_called_once_with(data)
 
-HOST = '0.0.0.0'
+HOST = 'localhost'
 PORT = 9200
-'''
+
 def test_segs_loader():
     segs_loader = SegsLoader(es_doc_type="segs_test", es_index="segs_test_index", es_host=HOST, es_port=PORT)
     segs_loader.load_file(analysis_file=CSV_FILE)
 
     assert True
-'''
