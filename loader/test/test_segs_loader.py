@@ -14,7 +14,7 @@ def segs_loader(mocker):
     segs_loader = SegsLoader(es_doc_type="test_doc_type", es_index="test_index", es_host="http://localhost", es_port="9200")
 
     db_connection = segs_loader.es_tools
-    mocker.spy(db_connection, 'submit_df_to_es')
+    mocker.spy(db_connection, 'submit_data_to_es')
     mocker.spy(db_connection, 'exists_index')
     return segs_loader
 
