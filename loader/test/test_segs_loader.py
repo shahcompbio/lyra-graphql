@@ -26,6 +26,9 @@ def test_read_file_csv(segs_loader):
     assert isinstance(data, pd.DataFrame)
 
 def test_read_file_h5(segs_loader):
+    print("Testing h5 read")
+    print(H5_FILE)
+    print(H5_SUBPATH)
     data = segs_loader._read_file(H5_FILE, H5_SUBPATH)
     assert isinstance(data, pd.DataFrame)
 
