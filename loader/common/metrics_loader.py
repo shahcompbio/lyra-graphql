@@ -51,6 +51,7 @@ class MetricsLoader(AnalysisLoader):
 
     def load_file(self, analysis_file=None, subpath=None):
         data = self._read_file(analysis_file, subpath)
+        data = self._transform_data(data)
         self._load_metrics_table(data)
 
 
@@ -62,11 +63,14 @@ class MetricsLoader(AnalysisLoader):
             hdf = pd.HDFStore(file, 'r')
             return hdf.get(subpath)
 
+    def _transform_data(self, data):
+        data.columns = self._update_columns(data.columns.values)
+        data = data.loc[:, self.__fields__]
+
+        return data
 
 
     def _load_metrics_table(self, data):
-        data.columns = self._update_columns(data.columns.values)
-        data = data.loc[:, self.__fields__]
 
         if not self.es_tools.exists_index():
             self.create_index()

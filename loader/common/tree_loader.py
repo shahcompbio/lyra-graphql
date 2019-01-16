@@ -50,6 +50,71 @@ class TreeLoader(AnalysisLoader):
             timeout=timeout)
 
     def load_file(self, analysis_file=None, ordering_file=None, root_id=None, tree_edges=None):
+        [tree, tree_root, ordering] = self._extract_file_to_data(analysis_file, ordering_file, root_id, tree_edges)
+        data = self._transform_data(tree, tree_root, ordering)
+        self._load_tree_data(data)
+
+    def _extract_file_to_data(self, analysis_file, ordering_file, root_id, tree_edges):
+        tree = self._get_rooted_tree(analysis_file, root_id, tree_edges)
+        tree_root = self._get_tree_root(tree)
+        ordering = self._get_tree_ordering(ordering_file, tree, tree_root)
+        return [tree, tree_root, ordering]
+
+    def _transform_data(self, tree, tree_root, ordering):
+        todo_list = [[tree_root, 'root']]
+        heatmap_index = 0
+        data = []
+
+        while todo_list != []:
+            [curr_node, curr_parent] = todo_list.pop(0)
+            unmerged_id = curr_node
+            max_height = self._get_max_height_from_node(tree, curr_node)
+            
+            if max_height != 0:
+
+                num_leaf_descendants = self._get_number_of_leaf_descendants(curr_node, tree)
+
+                curr_node, ordering = self._merge_if_child_is_single_internal_node(curr_node, ordering)
+
+                curr_children = ordering[curr_node]
+
+                index_record = {
+                    'cell_id': curr_node,
+                    'unmerged_id': unmerged_id,
+                    'parent': curr_parent,
+                    'children': curr_children,
+                    'max_height': max_height,
+                    'min_index': heatmap_index,
+                    'max_index': heatmap_index + num_leaf_descendants - 1
+                }
+
+                data = data + [index_record]
+                todo_list = [[child, curr_node] for child in curr_children] + todo_list
+
+
+            else: #is leaf node
+                curr_children = []
+                index_record = {
+                    'heatmap_order': heatmap_index,
+                    'cell_id': curr_node,
+                    'unmerged_id': unmerged_id,
+                    'parent': curr_parent,
+                    'children': [],
+                    'max_height': 0,
+                    'min_index': heatmap_index,
+                    'max_index': heatmap_index
+                }
+
+                data = data + [index_record]
+                heatmap_index += 1
+
+
+            logging.debug(index_record)
+
+        return data
+
+
+    def _load_tree_data(self, data):
         if self.es_tools.exists_index():
             logging.info('Tree data for analysis already exists - will delete old index')
             self.es_tools.delete_index()
@@ -57,16 +122,8 @@ class TreeLoader(AnalysisLoader):
         self.create_index()
 
         self.disable_index_refresh()
-        tree = self._get_rooted_tree(analysis_file, root_id, tree_edges)
-
-        tree_root = self._get_tree_root(tree)
-
-        ordering = self._get_tree_ordering(ordering_file, tree, tree_root)
-
-        self._load_tree_data(tree, ordering, tree_root)
-
+        self.es_tools.submit_data_to_es(data)
         self.enable_index_refresh()
-
 
 
     def _get_rooted_tree(self, analysis_file, root_id, tree_edges):
@@ -155,66 +212,6 @@ class TreeLoader(AnalysisLoader):
                     todo_list = curr_children + todo_list
 
         return ordering
-
-
-
-    def _load_tree_data(self, tree, ordering, tree_root):
-
-        todo_list = [[tree_root, 'root']]
-        heatmap_index = 0
-        data = []
-
-        while todo_list != []:
-            [curr_node, curr_parent] = todo_list.pop(0)
-            unmerged_id = curr_node
-            max_height = self._get_max_height_from_node(tree, curr_node)
-            
-            if max_height != 0:
-
-                num_leaf_descendants = self._get_number_of_leaf_descendants(curr_node, tree)
-
-                curr_node, ordering = self._merge_if_child_is_single_internal_node(curr_node, ordering)
-
-                curr_children = ordering[curr_node]
-
-                index_record = {
-                    'cell_id': curr_node,
-                    'unmerged_id': unmerged_id,
-                    'parent': curr_parent,
-                    'children': curr_children,
-                    'max_height': max_height,
-                    'min_index': heatmap_index,
-                    'max_index': heatmap_index + num_leaf_descendants - 1
-                }
-
-                data = data + [index_record]
-                todo_list = [[child, curr_node] for child in curr_children] + todo_list
-
-
-            else: #is leaf node
-                curr_children = []
-                index_record = {
-                    'heatmap_order': heatmap_index,
-                    'cell_id': curr_node,
-                    'unmerged_id': unmerged_id,
-                    'parent': curr_parent,
-                    'children': [],
-                    'max_height': 0,
-                    'min_index': heatmap_index,
-                    'max_index': heatmap_index
-                }
-
-                data = data + [index_record]
-                heatmap_index += 1
-
-
-            logging.debug(index_record)
-
-        # Submit any records remaining in the buffer for indexing
-
-        self.es_tools.submit_data_to_es(data)
-
-
 
 
     def _get_max_height_from_node(self, tree, node):
