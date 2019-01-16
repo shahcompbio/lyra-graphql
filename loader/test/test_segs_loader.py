@@ -48,7 +48,7 @@ def test_load_segs_table(segs_loader):
     segs_loader._load_segs_table(data)
 
     segs_loader.es_tools.exists_index.assert_called_once_with()
-    segs_loader.es_tools.submit_df_to_es.assert_called_once_with(data)
+    segs_loader.es_tools.submit_data_to_es.assert_called_once_with(data)
 
 HOST = 'localhost'
 PORT = 9200
