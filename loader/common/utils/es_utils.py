@@ -25,7 +25,7 @@ TIMEOUT = 300
 
 class ElasticSearchTools(object):
 
-    ''' Initializes the Elastic search api.  '''
+    ''' Initializes the Elasticsearch api '''
     __es_doc_type__ = "unknown"
     __es_index__ = "unknown_index"
     __es_port__ = 0
@@ -130,7 +130,7 @@ class ElasticSearchTools(object):
 
     def submit_to_es(self, record_to_insert):
         '''
-        Adds a record to the Elastic search index
+        Adds a record to the Elasticsearch index
         '''
         self.__es_id__ += 1
         t0 = time.time()
@@ -145,7 +145,13 @@ class ElasticSearchTools(object):
 
 
     def submit_df_to_es(self, data):
-        documents = data.where((pd.notnull(data)), None).to_dict(orient='records')
+        '''
+        Adds the provided pandas DataFrame or list to the Elasticsearch index
+        '''
+        if isinstance(data, pd.DataFrame):
+            documents = data.where((pd.notnull(data)), None).to_dict(orient='records')
+        elif isinstance(data, list):
+            documents = data
         try:
             res = helpers.bulk(self.es,
                             documents,
@@ -161,7 +167,7 @@ class ElasticSearchTools(object):
 
     def submit_bulk_to_es(self, records_to_insert):
         '''
-        Adds a group of records to the Elastic search index
+        Adds a group of records to the Elasticsearch index
         '''
         self.__es_id__ += len(records_to_insert) / 2
 	##debug

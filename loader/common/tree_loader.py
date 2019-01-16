@@ -212,8 +212,7 @@ class TreeLoader(AnalysisLoader):
 
         # Submit any records remaining in the buffer for indexing
 
-        data_table = pd.DataFrame(data)
-        self.es_tools.submit_df_to_es(data_table)
+        self.es_tools.submit_df_to_es(data)
 
 
 
