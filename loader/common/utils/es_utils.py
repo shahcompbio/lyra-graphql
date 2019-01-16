@@ -144,7 +144,7 @@ class ElasticSearchTools(object):
         return res
 
 
-    def submit_df_to_es(self, data):
+    def submit_data_to_es(self, data):
         '''
         Adds the provided pandas DataFrame or list to the Elasticsearch index
         '''

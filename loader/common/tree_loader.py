@@ -212,7 +212,7 @@ class TreeLoader(AnalysisLoader):
 
         # Submit any records remaining in the buffer for indexing
 
-        self.es_tools.submit_df_to_es(data)
+        self.es_tools.submit_data_to_es(data)
 
 
 

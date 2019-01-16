@@ -72,7 +72,7 @@ class MetricsLoader(AnalysisLoader):
             self.create_index()
 
         self.disable_index_refresh()
-        self.es_tools.submit_df_to_es(data)
+        self.es_tools.submit_data_to_es(data)
         self.enable_index_refresh()
 
 
