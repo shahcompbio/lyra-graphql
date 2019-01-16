@@ -23,7 +23,7 @@ jobs:
         - docker container ls
         - netstat -an|grep LISTEN
         - sleep 15
-        - curl http://localhost:9200
+        - curl http://0.0.0.0:9200
       install:
         - pip install -r pip-requires.txt
         - pip install -U pytest
