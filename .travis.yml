@@ -26,7 +26,7 @@ jobs:
         - curl http://0.0.0.0:9200
       install:
         - pip install -r pip-requires.txt
-        - pip install -U pytest
+        - pip install --upgrade pytest
       script:
         - pwd
         - python -m pytest test
