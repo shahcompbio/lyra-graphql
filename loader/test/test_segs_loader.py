@@ -2,7 +2,6 @@ import pytest
 import mock
 import pandas as pd
 from common.segs_loader import SegsLoader
-import warnings
 
 CSV_FILE = 'example/segs_data.csv'
 H5_FILE = 'example/segs_data.h5'
@@ -11,9 +10,6 @@ H5_SUBPATH = '/example/seg/path'
 
 @pytest.fixture
 def segs_loader(mocker):
-
-    warnings.filterwarnings("ignore", message="numpy.dtype size changed")
-    warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
     mocker.patch('common.utils.es_utils.ElasticSearchTools')
     segs_loader = SegsLoader(es_doc_type="test_doc_type", es_index="test_index", es_host="http://localhost", es_port="9200")
 
@@ -29,6 +25,8 @@ def test_read_file_csv(segs_loader):
     data = segs_loader._read_file(CSV_FILE)
     assert isinstance(data, pd.DataFrame)
 
+@pytest.mark.filterwarnings("ignore:numpy.dtype size changed")
+@pytest.mark.filterwarnings("ignore:numpy.ufunc size changed")
 def test_read_file_h5(segs_loader):
     data = segs_loader._read_file(H5_FILE, H5_SUBPATH)
     assert isinstance(data, pd.DataFrame)

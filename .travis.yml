@@ -21,7 +21,6 @@ jobs:
         - docker build --tag=elasticsearchtest .
         - docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
         - docker container ls
-        - netstat -an|grep LISTEN
         - sleep 30
         - curl http://0.0.0.0:9200
       install:
@@ -29,7 +28,7 @@ jobs:
         - pip install --upgrade pytest
       script:
         - pwd
-        - python -m pytest test -v -s --disable-pytest-warnings
+        - python -m pytest test -v -s
     - stage: tests
       language: node_js
       node_js: stable
