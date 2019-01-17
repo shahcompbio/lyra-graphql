@@ -39,6 +39,7 @@ jobs:
       script:
         - pwd
     - stage: deploy_prod
+    - stage: deploy_prod
       language: node_js
       node_js: stable
       cache: yarn
@@ -96,3 +97,5 @@ jobs:
         skip_cleanup: true
         script:
           - rsync -r $TRAVIS_BUILD_DIR/lib/* $DEPLOY_USER@deploy:lyra-graphql/lib/
+        on:
+          branch: staging
