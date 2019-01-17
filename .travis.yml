@@ -3,7 +3,10 @@ dist: trusty
 
 stages:
   - tests
-  - deploy
+  - name: deploy_prod
+    if: branch = master
+  - name: deploy_test
+    if: branch = staging
 
 jobs:
   include:
@@ -35,7 +38,7 @@ jobs:
       cache: yarn
       script:
         - pwd
-    - stage: deploy
+    - stage: deploy_prod
       language: node_js
       node_js: stable
       cache: yarn
@@ -64,5 +67,32 @@ jobs:
         skip_cleanup: true
         script:
           - rsync -r $TRAVIS_BUILD_DIR/lib/* $DEPLOY_USER@deploy:lyra-graphql/lib/
-        on:
-          branch: master
+    - stage: deploy_test
+      language: node_js
+      node_js: stable
+      cache: yarn
+      addons:
+        ssh_known_hosts: "$DEPLOY_TEST_HOST"
+      before_script:
+        - npm install pm2 -g
+      before_install:
+        - openssl aes-256-cbc -K $encrypted_531226d110e9_key -iv $encrypted_531226d110e9_iv -in deploy_rsa.enc -out /tmp/deploy_rsa -d
+        - pwd
+        - ls -la
+      before_deploy:
+        - echo -e "Host deploy\n\tHostName $DEPLOY_TEST_HOST\n\tIdentityFile /tmp/deploy_rsa\n\tUser
+          $DEPLOY_USER\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+        - eval "$(ssh-agent -s)"
+        - chmod 600 /tmp/deploy_rsa
+        - ssh-add /tmp/deploy_rsa
+      install:
+        - npm install --save
+      script:
+        - npm run build
+      after_deploy:
+        - ssh $DEPLOY_USER@deploy 'pm2 restart index'
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script:
+          - rsync -r $TRAVIS_BUILD_DIR/lib/* $DEPLOY_USER@deploy:lyra-graphql/lib/
