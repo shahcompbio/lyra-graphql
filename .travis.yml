@@ -39,7 +39,6 @@ jobs:
       script:
         - pwd
     - stage: deploy_prod
-    - stage: deploy_prod
       language: node_js
       node_js: stable
       cache: yarn
