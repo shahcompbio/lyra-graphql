@@ -15,9 +15,21 @@ def tree_loader(mocker):
 
 
 NEWICK_FILE = 'example/tree_data.newick'
+ROOTED_GML_FILE = 'example/rooted_tree_data.gml'
+UNROOTED_GML_FILE = 'example/unrooted_tree_data.gml'
 
 def test_get_rooted_tree_newick(tree_loader):
     tree = tree_loader._get_rooted_tree(NEWICK_FILE)
+    assert isinstance(tree, nx.DiGraph)
+    assert len(list(tree.nodes)) == 6
+
+def test_get_rooted_tree_rooted_gml(tree_loader):
+    tree = tree_loader._get_rooted_tree(ROOTED_GML_FILE)
+    assert isinstance(tree, nx.Graph)
+    assert len(list(tree.nodes)) == 6
+
+def test_get_rooted_tree_unrooted_gml(tree_loader):
+    tree = tree_loader._get_rooted_tree(analysis_file=ROOTED_GML_FILE, root_id="ROOT")
     assert isinstance(tree, nx.Graph)
     assert len(list(tree.nodes)) == 6
 
