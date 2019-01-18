@@ -15,6 +15,7 @@ def tree_loader(mocker):
 
 
 NEWICK_FILE = 'example/tree_data.newick'
+COMPRESS_NEWICK_FILE = 'example/tree_compress_data.newick'
 ROOTED_GML_FILE = 'example/rooted_tree_data.gml'
 UNROOTED_GML_FILE = 'example/unrooted_tree_data.gml'
 TREE_ORDER_FILE = 'example/tree_order_data.tsv'
@@ -58,6 +59,13 @@ def test_get_tree_ordering_by_file(tree_loader):
 
 def test_transform_data(tree_loader):
     [tree, tree_root, tree_ordering] = tree_loader._extract_file_to_data(NEWICK_FILE)
+    data = tree_loader._transform_data(tree, tree_root, tree_ordering)
+    assert isinstance(data, list)
+    assert len(data) == 6
+
+
+def test_transform_data_with_compression(tree_loader):
+    [tree, tree_root, tree_ordering] = tree_loader._extract_file_to_data(COMPRESS_NEWICK_FILE)
     data = tree_loader._transform_data(tree, tree_root, tree_ordering)
     assert isinstance(data, list)
     assert len(data) == 6
