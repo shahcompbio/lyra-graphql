@@ -17,6 +17,7 @@ def tree_loader(mocker):
 NEWICK_FILE = 'example/tree_data.newick'
 ROOTED_GML_FILE = 'example/rooted_tree_data.gml'
 UNROOTED_GML_FILE = 'example/unrooted_tree_data.gml'
+TREE_ORDER_FILE = 'example/tree_order_data.tsv'
 
 def test_get_rooted_tree_newick(tree_loader):
     tree = tree_loader._get_rooted_tree(NEWICK_FILE)
@@ -38,11 +39,18 @@ def test_get_tree_root(tree_loader):
     tree_root = tree_loader._get_tree_root(tree)
     assert tree_root == 'root'
 
-def test_get_tree_ordering(tree_loader):
+def test_get_tree_ordering_by_descendents(tree_loader):
     tree = tree_loader._get_rooted_tree(NEWICK_FILE)
     tree_root = tree_loader._get_tree_root(tree)
     tree_ordering = tree_loader._get_tree_ordering(tree=tree, tree_root=tree_root)
 
     assert tree_ordering[tree_root] == ['CELL1','CELL4','LOCI1']
+    assert len(tree_ordering['LOCI1']) == len(['CELL2', 'CELL3'])
+    assert 'CELL1' not in tree_ordering
+
+def test_get_tree_ordering_by_file(tree_loader):
+    tree_ordering = tree_loader._get_tree_ordering(TREE_ORDER_FILE)
+
+    assert tree_ordering['ROOT'] == ['CELL1','CELL4','LOCI1']
     assert len(tree_ordering['LOCI1']) == len(['CELL2', 'CELL3'])
     assert 'CELL1' not in tree_ordering
