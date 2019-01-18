@@ -69,3 +69,18 @@ def test_transform_data_with_compression(tree_loader):
     data = tree_loader._transform_data(tree, tree_root, tree_ordering)
     assert isinstance(data, list)
     assert len(data) == 6
+
+
+def test_merge_if_child_is_single_internal_node_will_merge(tree_loader):
+    [tree, tree_root, tree_ordering] = tree_loader._extract_file_to_data(COMPRESS_NEWICK_FILE)
+    (node, new_tree_ordering) = tree_loader._merge_if_child_is_single_internal_node('LOCI2', tree_ordering)
+    assert node == 'LOCI2, LOCI1'
+    assert node in new_tree_ordering
+    assert new_tree_ordering[node] == tree_ordering['LOCI1']
+
+def test_merge_if_child_is_single_internal_node_will_not_merge(tree_loader):
+    [tree, tree_root, tree_ordering] = tree_loader._extract_file_to_data(COMPRESS_NEWICK_FILE)
+    (node, new_tree_ordering) = tree_loader._merge_if_child_is_single_internal_node('LOCI1', tree_ordering)
+    assert node == 'LOCI1'
+    assert node in new_tree_ordering
+    assert new_tree_ordering[node] == tree_ordering['LOCI1']
