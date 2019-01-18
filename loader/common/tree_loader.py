@@ -69,7 +69,7 @@ class TreeLoader(AnalysisLoader):
             [curr_node, curr_parent] = todo_list.pop(0)
             unmerged_id = curr_node
             max_height = self._get_max_height_from_node(tree, curr_node)
-            
+
             if max_height != 0:
 
                 num_leaf_descendants = self._get_number_of_leaf_descendants(curr_node, tree)
@@ -126,7 +126,7 @@ class TreeLoader(AnalysisLoader):
         self.enable_index_refresh()
 
 
-    def _get_rooted_tree(self, analysis_file, root_id, tree_edges):
+    def _get_rooted_tree(self, analysis_file=None, root_id=None, tree_edges=None):
         # load graph from newick
         if analysis_file.endswith('.newick'):
             newick_tree = Phylo.read(analysis_file, 'newick')
@@ -177,7 +177,7 @@ class TreeLoader(AnalysisLoader):
 
 
 
-    def _get_tree_ordering(self, ordering_file, tree, tree_root):
+    def _get_tree_ordering(self, ordering_file=None, tree=None, tree_root=None):
 
 
         def _count_descendents(node):
