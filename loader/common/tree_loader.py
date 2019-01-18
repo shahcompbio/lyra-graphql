@@ -54,7 +54,7 @@ class TreeLoader(AnalysisLoader):
         data = self._transform_data(tree, tree_root, ordering)
         self._load_tree_data(data)
 
-    def _extract_file_to_data(self, analysis_file, ordering_file, root_id, tree_edges):
+    def _extract_file_to_data(self, analysis_file=None, ordering_file=None, root_id=None, tree_edges=None):
         tree = self._get_rooted_tree(analysis_file, root_id, tree_edges)
         tree_root = self._get_tree_root(tree)
         ordering = self._get_tree_ordering(ordering_file, tree, tree_root)

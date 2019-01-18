@@ -54,3 +54,10 @@ def test_get_tree_ordering_by_file(tree_loader):
     assert tree_ordering['ROOT'] == ['CELL1','CELL4','LOCI1']
     assert len(tree_ordering['LOCI1']) == len(['CELL2', 'CELL3'])
     assert 'CELL1' not in tree_ordering
+
+
+def test_transform_data(tree_loader):
+    [tree, tree_root, tree_ordering] = tree_loader._extract_file_to_data(NEWICK_FILE)
+    data = tree_loader._transform_data(tree, tree_root, tree_ordering)
+    assert isinstance(data, list)
+    assert len(data) == 6
