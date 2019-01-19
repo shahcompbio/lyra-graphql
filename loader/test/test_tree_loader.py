@@ -116,3 +116,22 @@ def test_create_index_record_internal(tree_loader):
     assert len(index_record['children']) == 2
     assert index_record['min_index'] == 1
     assert index_record['max_index'] == 3
+
+
+def test_load_data(tree_loader):
+    [tree, tree_root, tree_ordering] = tree_loader._extract_file_to_data(NEWICK_FILE)
+    data = tree_loader._transform_data(tree, tree_root, tree_ordering)
+    tree_loader._load_tree_data(data)
+
+    tree_loader.es_tools.exists_index.assert_called_once_with()
+    tree_loader.es_tools.submit_data_to_es.assert_called_once_with(data)
+
+
+HOST = 'localhost'
+PORT = 9200
+
+def test_tree_loader():
+    tree_loader = TreeLoader(es_doc_type="tree_test", es_index="tree_test_index", es_host=HOST, es_port=PORT)
+    tree_loader.load_file(analysis_file=NEWICK_FILE)
+
+    assert True
