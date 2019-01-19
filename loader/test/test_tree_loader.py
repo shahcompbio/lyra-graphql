@@ -84,3 +84,35 @@ def test_merge_if_child_is_single_internal_node_will_not_merge(tree_loader):
     assert node == 'LOCI1'
     assert node in new_tree_ordering
     assert new_tree_ordering[node] == tree_ordering['LOCI1']
+
+def test_create_index_record_leaf(tree_loader):
+    index_record = tree_loader._create_index_record(
+        node_id="CELL1",
+        unmerged_id="CELL1",
+        heatmap_index=1,
+        max_height=0,
+        parent="ROOT",
+    )
+    assert 'heatmap_order' in index_record
+    assert index_record['heatmap_order'] == 1
+    assert index_record['cell_id'] == "CELL1"
+    assert len(index_record['children']) == 0
+    assert index_record['min_index'] == 1
+    assert index_record['max_index'] == 1
+
+def test_create_index_record_internal(tree_loader):
+    index_record = tree_loader._create_index_record(
+        node_id="LOCI2, LOCI1",
+        unmerged_id="LOCI2",
+        heatmap_index=1,
+        max_height=2,
+        parent="ROOT",
+        children=['CELL2', 'CELL3'],
+        num_leafs=3,
+        is_leaf=False
+    )
+    assert 'heatmap_order' not in index_record
+    assert index_record['cell_id'] == "LOCI2, LOCI1"
+    assert len(index_record['children']) == 2
+    assert index_record['min_index'] == 1
+    assert index_record['max_index'] == 3

@@ -73,37 +73,32 @@ class TreeLoader(AnalysisLoader):
             if max_height != 0:
 
                 num_leaf_descendants = self._get_number_of_leaf_descendants(curr_node, tree)
-
                 curr_node, ordering = self._merge_if_child_is_single_internal_node(curr_node, ordering)
-
                 curr_children = ordering[curr_node]
 
-                index_record = {
-                    'cell_id': curr_node,
-                    'unmerged_id': unmerged_id,
-                    'parent': curr_parent,
-                    'children': curr_children,
-                    'max_height': max_height,
-                    'min_index': heatmap_index,
-                    'max_index': heatmap_index + num_leaf_descendants - 1
-                }
+                index_record = self._create_index_record(
+                    node_id=curr_node,
+                    unmerged_id=unmerged_id,
+                    heatmap_index=heatmap_index,
+                    parent=curr_parent,
+                    children=curr_children,
+                    max_height=max_height,
+                    num_leafs=num_leaf_descendants,
+                    is_leaf=False
+                )
 
                 data = data + [index_record]
                 todo_list = [[child, curr_node] for child in curr_children] + todo_list
 
 
-            else: #is leaf node
-                curr_children = []
-                index_record = {
-                    'heatmap_order': heatmap_index,
-                    'cell_id': curr_node,
-                    'unmerged_id': unmerged_id,
-                    'parent': curr_parent,
-                    'children': [],
-                    'max_height': 0,
-                    'min_index': heatmap_index,
-                    'max_index': heatmap_index
-                }
+            else: #is leaf node]
+                index_record = self._create_index_record(
+                    node_id=curr_node,
+                    unmerged_id=unmerged_id,
+                    heatmap_index=heatmap_index,
+                    parent=curr_parent,
+                    max_height=max_height
+                )
 
                 data = data + [index_record]
                 heatmap_index += 1
@@ -113,6 +108,22 @@ class TreeLoader(AnalysisLoader):
 
         return data
 
+    def _create_index_record(self, node_id, unmerged_id, heatmap_index, max_height, parent, children=[], num_leafs=1, is_leaf=True):
+
+        index_record = {
+            'cell_id': node_id,
+            'unmerged_id': unmerged_id,
+            'parent': parent,
+            'children': children,
+            'max_height': max_height,
+            'min_index': heatmap_index,
+            'max_index': heatmap_index + num_leafs - 1
+        }
+
+        if is_leaf:
+            index_record['heatmap_order'] = heatmap_index
+
+        return index_record
 
     def _load_tree_data(self, data):
         if self.es_tools.exists_index():
