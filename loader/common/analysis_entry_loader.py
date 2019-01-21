@@ -43,18 +43,13 @@ class AnalysisEntryLoader(object):
             self.es_tools.refresh_index()
 
             # Delete analysis entry if it already exists
-            r = self.es_tools.search(self.analysis_record_query(record, dashboard))
-            if r['hits']['total'] > 0:
-                logging.info('Duplicate analysis found - deleting old record')
-                self.es_tools.delete_record(r['hits']['hits'][0])
-                self.es_tools.refresh_index()
+            self._delete_old_analysis_record(record, dashboard)
 
             self.es_tools.submit_to_es(record)
 
         except Exception:
             logging.error(traceback.format_exc(traceback.extract_stack()))
             pass
-
 
 
     def get_mappings(self):
@@ -84,6 +79,14 @@ class AnalysisEntryLoader(object):
         }
 
         return mappings
+
+    def _delete_old_analysis_record(self, record, dashboard):
+        r = self.es_tools.search(self.analysis_record_query(record, dashboard))
+        if r['hits']['total'] > 0:
+            logging.info('Duplicate analysis found - deleting old record')
+            self.es_tools.delete_record(r['hits']['hits'][0])
+            self.es_tools.refresh_index()
+
 
     def analysis_record_query(self, record, dashboard):
         '''
