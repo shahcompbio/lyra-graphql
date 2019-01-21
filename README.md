@@ -87,3 +87,25 @@ yarn start
 ```
 
 Following the URL `http://localhost:4000` should bring you to the GraphQL playground, where you can enter queries.
+
+### Running Tests
+
+Start the docker container for a localized ElasticSearch instance
+
+```
+cd loader
+docker build --tag=elasticsearchtest .
+docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
+```
+
+To run the Python tests, run the virtualenv and then the tests:
+
+```
+source ~/pythonenv/bin/activate
+pytest
+
+or
+
+source ~/pythonenv/bin/activate
+python -m pytest test -v -s
+```
