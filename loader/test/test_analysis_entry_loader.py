@@ -17,7 +17,6 @@ ANALYSIS_ENTRY_2 = {
 
 @pytest.fixture
 def analysis_entry_loader(mocker):
-    print("Setup Analysis Entry")
     mocker.patch('common.utils.es_utils.ElasticSearchTools')
     analysis_entry_loader = AnalysisEntryLoader(host="test", port="9200")
 
@@ -30,7 +29,6 @@ def analysis_entry_loader(mocker):
     mocker.spy(db_connection, 'exists')
     mocker.spy(db_connection, 'create_index')
     yield analysis_entry_loader
-    print("Teardown Analysis Entry")
 
 
 
