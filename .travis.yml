@@ -26,18 +26,22 @@ jobs:
         - docker container ls
         - sleep 30
         - curl http://0.0.0.0:9200
-      install:
-        - pip install -r pip-requires.txt
-        - pip install --upgrade pytest
+
       script:
         - pwd
         - python -m pytest test -v -s
     - stage: tests
-      language: node_js
-      node_js: stable
-      cache: yarn
-      script:
-        - pwd
+      matrix:
+        include:
+          - language: python
+            python: 2.7
+            install:
+              - pip install -r loader/pip-requires.txt
+          - language: node_js
+            node_js: stable
+            cache: yarn
+            script:
+              - pwd
     - stage: deploy_prod
       language: node_js
       node_js: stable
