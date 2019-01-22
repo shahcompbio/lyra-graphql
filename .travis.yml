@@ -37,6 +37,14 @@ jobs:
       language: node_js
       node_js: stable
       cache: yarn
+      install:
+        - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        - pip install virtualenv
+        - virtualenv ~/pythonenv
+        - source ~/pythonenv/bin/activate
+        - cd loader
+        - pip install -r ./pip-requires.txt
+        - python tree_cellscape/tree_cellscape_loader.py -y ../example/analysis_yaml.yaml
       script:
         - pwd
     - stage: deploy_prod
