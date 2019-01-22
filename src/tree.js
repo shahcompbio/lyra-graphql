@@ -26,9 +26,9 @@ export const schema = gql`
   }
 `;
 
-const formatIdStringToList = (idStr) => idStr.split(",").map(item => item.trim());
+const formatIdStringToList = idStr => idStr.split(",").map(item => item.trim());
 
-const getHeatmapIndex = (record) => record.hasOwnProperty("heatmap_order") ? record.heatmap_order : record.min_index;
+const getHeatmapIndex = record => record.hasOwnProperty("heatmap_order") ? record.heatmap_order : record.min_index;
 
 export const resolvers = {
   Query: {
