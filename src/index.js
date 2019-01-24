@@ -7,7 +7,6 @@ import { merge } from "lodash";
 
 const { ApolloServer } = require("apollo-server-express");
 const { gql } = require("apollo-server");
-const { createTestClient } = require("apollo-server-testing");
 
 const baseSchema = gql`
   type Query {
