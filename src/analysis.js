@@ -3,7 +3,7 @@ const { gql } = require("apollo-server");
 import client from "./api/elasticsearch.js";
 
 export const schema = gql`
-  type Query {
+  extend type Query {
     dashboards: [Dashboard!]!
     analysis(analysis: String!, dashboard: String!): Analysis
   }

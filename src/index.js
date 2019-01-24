@@ -6,9 +6,23 @@ import * as analysis from "./analysis.js";
 import { merge } from "lodash";
 
 const { ApolloServer } = require("apollo-server-express");
+const { gql } = require("apollo-server");
+const { createTestClient } = require("apollo-server-testing");
+
+const baseSchema = gql`
+  type Query {
+    _blank: String
+  }
+`;
 
 const server = new ApolloServer({
-  typeDefs: [analysis.schema, tree.schema, segs.schema, metrics.schema],
+  typeDefs: [
+    baseSchema,
+    analysis.schema,
+    tree.schema,
+    segs.schema,
+    metrics.schema
+  ],
   resolvers: merge(
     analysis.resolvers,
     tree.resolvers,

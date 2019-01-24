@@ -1,18 +1,17 @@
 import "babel-polyfill";
 
-const { ApolloServer } = require("apollo-server");
+const { ApolloServer, gql } = require("apollo-server");
 const { createTestClient } = require("apollo-server-testing");
-const { MockList } = require("apollo-server");
 
-const mocks = {
-  Query: () => ({
-    dashboards: () => new MockList([1, 3])
-  })
-};
+const baseSchema = gql`
+  type Query {
+    _blank: String
+  }
+`;
 
 export async function startServer(schema, resolvers) {
   const server = await new ApolloServer({
-    typeDefs: schema,
+    typeDefs: [baseSchema, schema],
     resolvers
   });
 
