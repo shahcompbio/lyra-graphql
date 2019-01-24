@@ -46,6 +46,9 @@ jobs:
         - python tree_cellscape/tree_cellscape_loader.py -y ../example/analysis_yaml.yaml
       script:
         - pwd
+        - cd ..
+        - npm install --save
+        - npm run test
     - stage: deploy_prod
       language: node_js
       node_js: stable
