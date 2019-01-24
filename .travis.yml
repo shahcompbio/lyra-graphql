@@ -11,7 +11,6 @@ stages:
 services:
   - docker
 before_install:
-  - cd loader
   - docker --version
   - sudo apt-get update
   - sudo apt-get install docker-ce
@@ -28,6 +27,7 @@ jobs:
       language: python
       python: "2.7"
       install:
+        - cd loader
         - pip install -r pip-requires.txt
         - pip install --upgrade pytest
       script:
@@ -42,6 +42,7 @@ jobs:
         - pip install virtualenv
         - virtualenv ~/pythonenv
         - source ~/pythonenv/bin/activate
+        - cd loader
         - pip install -r ./pip-requires.txt
         - python tree_cellscape/tree_cellscape_loader.py -y ../example/analysis_yaml.yaml
       script:
