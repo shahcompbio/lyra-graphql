@@ -10,10 +10,10 @@ const mocks = {
   })
 };
 
-export async function startServer(schema) {
+export async function startServer(schema, resolvers) {
   const server = await new ApolloServer({
     typeDefs: schema,
-    mocks
+    resolvers
   });
 
   return createTestClient(server);

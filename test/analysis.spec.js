@@ -6,7 +6,7 @@ const util = require("util");
 
 let query;
 beforeAll(async () => {
-  const client = await startServer(schema);
+  const client = await startServer(schema, resolvers);
   query = client.query;
 });
 
