@@ -98,7 +98,7 @@ docker build --tag=elasticsearchtest .
 docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
 ```
 
-To run the Python tests, run the virtualenv and then the tests:
+To run the Python tests, run the virtualenv (see instructions above on setting them up) and then the tests:
 
 ```
 source ~/pythonenv/bin/activate
@@ -108,4 +108,15 @@ or
 
 source ~/pythonenv/bin/activate
 python -m pytest test -v -s
+```
+
+The tests for the graphQL layer assumes that there is some example data in the ElasticSearch instance. Load them with the python loaders. Then run the tests.
+
+```
+source ~/pythonenv/bin/activate
+cd loader
+python tree_cellscape/tree_cellscape_loader.py -y ../example/analysis_yaml.yaml
+
+cd ..
+yarn test
 ```
