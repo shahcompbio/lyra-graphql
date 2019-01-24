@@ -21,6 +21,7 @@ import math
 import __builtin__
 import networkx as nx
 import pandas as pd
+import json
 
 from Bio import Phylo
 from networkx.algorithms.traversal.depth_first_search import dfs_tree
@@ -53,6 +54,14 @@ class TreeLoader(AnalysisLoader):
         [tree, tree_root, ordering] = self._extract_file_to_data(analysis_file, ordering_file, root_id, tree_edges)
         data = self._transform_data(tree, tree_root, ordering)
         self._load_tree_data(data)
+
+    def load_file_as_json(self,  analysis_file=None, ordering_file=None, root_id=None, tree_edges=None):
+        [tree, tree_root, ordering] = self._extract_file_to_data(analysis_file, ordering_file, root_id, tree_edges)
+        data = self._transform_data(tree, tree_root, ordering)
+        json_data = json.dumps(data)
+        print(json_data)
+        return json_data
+
 
     def _extract_file_to_data(self, analysis_file=None, ordering_file=None, root_id=None, tree_edges=None):
         tree = self._get_rooted_tree(analysis_file, root_id, tree_edges)
