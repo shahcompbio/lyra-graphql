@@ -8,25 +8,26 @@ stages:
   - name: deploy_test
     if: branch = staging
 
+services:
+  - docker
+before_install:
+  - docker --version
+  - sudo apt-get update
+  - sudo apt-get install docker-ce
+  - docker --version
+  - docker build --tag=elasticsearchtest .
+  - docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
+  - docker container ls
+  - sleep 30
+  - curl http://0.0.0.0:9200
+
 jobs:
   include:
     - stage: tests
       language: python
       python: "2.7"
-      services:
-        - docker
-      before_install:
-        - cd loader
-        - docker --version
-        - sudo apt-get update
-        - sudo apt-get install docker-ce
-        - docker --version
-        - docker build --tag=elasticsearchtest .
-        - docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
-        - docker container ls
-        - sleep 30
-        - curl http://0.0.0.0:9200
       install:
+        - cd loader
         - pip install -r pip-requires.txt
         - pip install --upgrade pytest
       script:
@@ -36,8 +37,19 @@ jobs:
       language: node_js
       node_js: stable
       cache: yarn
+      install:
+        - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        - pip install virtualenv
+        - virtualenv ~/pythonenv
+        - source ~/pythonenv/bin/activate
+        - cd loader
+        - pip install -r ./pip-requires.txt
+        - python tree_cellscape/tree_cellscape_loader.py -y ../example/analysis_yaml.yaml
       script:
         - pwd
+        - cd ..
+        - npm install --save
+        - npm run test
     - stage: deploy_prod
       language: node_js
       node_js: stable

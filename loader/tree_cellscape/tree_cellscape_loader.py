@@ -94,10 +94,11 @@ def load_segs_data(args, yaml_data):
         logging.info('Seg data for analysis already exists - will delete old index')
         segs_loader.es_tools.delete_index()
 
-    for seg_file in seg_files:
-        segs_loader.load_file(
-            analysis_file=seg_file
-        )
+    if seg_files is not None:
+        for seg_file in seg_files:
+            segs_loader.load_file(
+                analysis_file=seg_file
+            )
 
 
     h5_files = yaml_data.get_file_paths('h5')
@@ -142,10 +143,13 @@ def load_metrics_data(args, yaml_data):
     if h5_files is not None:
         logging.info('Loading H5 data')
         for hdf_paths in h5_files:
-            metrics_loader.load_file(
-                analysis_file=hdf_paths['base'],
-                subpath=hdf_paths['metrics']
-            )
+            try:
+                metrics_loader.load_file(
+                    analysis_file=hdf_paths['base'],
+                    subpath=hdf_paths['metrics']
+                )
+            except KeyError:
+                pass
 
 
 def load_bins_data(args, yaml_data):
@@ -171,14 +175,13 @@ def load_bins_data(args, yaml_data):
     bin_files = yaml_data.get_file_paths('bins')
     h5_files = yaml_data.get_file_paths('h5')
 
-    has_bin_data = bin_files is not None or h5_files is not None
+
+    if bins_loader.es_tools.exists_index():
+        logging.info('Bin data for analysis already exists - will delete old index')
+        bins_loader.es_tools.delete_index()
 
 
-    if has_bin_data:
-        if bins_loader.es_tools.exists_index():
-            logging.info('Bin data for analysis already exists - will delete old index')
-            bins_loader.es_tools.delete_index()
-
+    has_bin_data = False
 
     if bin_files is not None:
         logging.info('Loading CSV tables')
@@ -186,15 +189,20 @@ def load_bins_data(args, yaml_data):
             bins_loader.load_file(
                 analysis_file=bin_file
             )
+        has_bin_data = True
 
 
     if h5_files is not None:
         logging.info('Loading H5 data')
-        for hdf_paths in h5_files:
-            bins_loader.load_file(
-                analysis_file=hdf_paths['base'],
-                subpath=hdf_paths['bins']
-            )
+        try:
+            for hdf_paths in h5_files:
+                bins_loader.load_file(
+                    analysis_file=hdf_paths['base'],
+                    subpath=hdf_paths['bins']
+                )
+            has_bin_data = True
+        except KeyError:
+            pass
 
     if has_bin_data:
         logging.info("")

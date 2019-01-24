@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test chromosomes query 1`] = `
+Object {
+  "data": undefined,
+  "errors": Array [
+    [ValidationError: Field "chromosomes" argument "analysis" of type "String!" is required but not provided.],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`test segs query 1`] = `
+Object {
+  "data": undefined,
+  "errors": Array [
+    [ValidationError: Field "segs" argument "analysis" of type "String!" is required but not provided.],
+    [ValidationError: Field "segs" argument "indices" of type "[Int!]!" is required but not provided.],
+    [ValidationError: Field "segs" argument "isNorm" of type "Boolean!" is required but not provided.],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;

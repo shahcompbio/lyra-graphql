@@ -1,0 +1,8 @@
+analysis_id: ABC_123
+jira_id: ABC
+description: Sample analysis
+files:
+  tree: ../example/tree_data.newick
+  h5:
+    - base: ../example/segs_data.h5
+      segs: /example/seg/path

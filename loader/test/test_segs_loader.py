@@ -3,8 +3,8 @@ import mock
 import pandas as pd
 from common.segs_loader import SegsLoader
 
-CSV_FILE = 'example/segs_data.csv'
-H5_FILE = 'example/segs_data.h5'
+CSV_FILE = '../example/segs_data.csv'
+H5_FILE = '../example/segs_data.h5'
 H5_SUBPATH = '/example/seg/path'
 
 

@@ -14,11 +14,11 @@ def tree_loader(mocker):
     return tree_loader
 
 
-NEWICK_FILE = 'example/tree_data.newick'
-COMPRESS_NEWICK_FILE = 'example/tree_compress_data.newick'
-ROOTED_GML_FILE = 'example/rooted_tree_data.gml'
-UNROOTED_GML_FILE = 'example/unrooted_tree_data.gml'
-TREE_ORDER_FILE = 'example/tree_order_data.tsv'
+NEWICK_FILE = '../example/tree_data.newick'
+COMPRESS_NEWICK_FILE = '../example/tree_compress_data.newick'
+ROOTED_GML_FILE = '../example/rooted_tree_data.gml'
+UNROOTED_GML_FILE = '../example/unrooted_tree_data.gml'
+TREE_ORDER_FILE = '../example/tree_order_data.tsv'
 
 def test_get_rooted_tree_newick(tree_loader):
     tree = tree_loader._get_rooted_tree(NEWICK_FILE)

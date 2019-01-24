@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`test treeNode query with ID 1`] = `
+Object {
+  "data": undefined,
+  "errors": Array [
+    [ValidationError: Field "treeNode" argument "analysis" of type "String!" is required but not provided.],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`test treeNode query with index 1`] = `
+Object {
+  "data": undefined,
+  "errors": Array [
+    [ValidationError: Field "treeNode" argument "analysis" of type "String!" is required but not provided.],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`test treeNodes query 1`] = `
+Object {
+  "data": undefined,
+  "errors": Array [
+    [ValidationError: Field "treeNodes" argument "analysis" of type "String!" is required but not provided.],
+    [ValidationError: Field "treeNodes" argument "range" of type "[Int!]!" is required but not provided.],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`test treeRoot query 1`] = `
+Object {
+  "data": undefined,
+  "errors": Array [
+    [ValidationError: Field "treeRoot" argument "analysis" of type "String!" is required but not provided.],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
