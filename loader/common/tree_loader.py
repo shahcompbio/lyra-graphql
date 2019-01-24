@@ -36,8 +36,8 @@ class TreeLoader(AnalysisLoader):
             self,
             es_doc_type=None,
             es_index=None,
-            es_host=None,
-            es_port=None,
+            es_host='localhost',
+            es_port=9200,
             use_ssl=False,
             http_auth=None,
             timeout=None):
