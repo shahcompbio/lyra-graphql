@@ -11,6 +11,7 @@ from common.segs_loader import SegsLoader
 from common.metrics_loader import MetricsLoader
 from common.bins_loader import BinsLoader
 from common.normalize_segs import normalize_segs
+from common.preprocessor import Preprocessor
 
 dashboard_type = "TREE_CELLSCAPE"
 
@@ -221,6 +222,26 @@ def load_bins_data(args, yaml_data):
         normalize_segs(bins_loader, norm_segs_loader)
 
 
+def run_preprocessing(args, yaml_data):
+    logging.info("")
+    logging.info("")
+    logging.info("==================")
+    logging.info("RUNNING PREPROCESSOR")
+    logging.info("==================")
+
+    if args.preprocessing is False:
+        logging.info('Skipping preprocessing')
+        return
+
+    file_path = yaml_data.get_file_paths("tree")
+    preprocessor = Preprocessor(
+        newick_file=file_path,
+        matching_required=args.match_id
+    )
+
+    preprocessor.preprocess()
+
+
 def get_args():
     '''
     Argument parser
@@ -274,12 +295,27 @@ def get_args():
         choices=['info', 'debug', 'warn', 'error'],
         type=str,
         default="info")
+    parser.add_argument(
+        '-pp',
+        '--preprocessing',
+        dest='preprocessing',
+        action='store_true',
+        help='Specifies whether preprocessing is required.',
+        default=False)
+    parser.add_argument(
+        '-m',
+        '--match-id',
+        dest='match_id',
+        action='store_true',
+        help='Specifies whether preprocessing should run the match_id operation.',
+        default=False)
     return parser.parse_args()
 
 def main():
     args = get_args()
     _set_logger_config(args.verbosity)
     yaml_data = YamlData(args.yaml_file)
+    run_preprocessing(args, yaml_data)
     load_tree_data(args, yaml_data)
 
     load_segs_data(args, yaml_data)
