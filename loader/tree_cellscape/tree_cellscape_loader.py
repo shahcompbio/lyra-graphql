@@ -220,10 +220,14 @@ def run_preprocessing(args, yaml_data):
     logging.info("==================")
     logging.info("RUNNING PREPROCESSOR")
     logging.info("==================")
+
+    if args.preprocessing is False:
+        logging.info('Skipping preprocessing')
+        return
+
     file_path = yaml_data.get_file_paths("tree")
     preprocessor = Preprocessor(
         newick_file=file_path,
-        preprocessing_required=args.preprocessing,
         matching_required=args.match_id
     )
 
