@@ -70,7 +70,7 @@ class TreeLoader(AnalysisLoader):
         return [tree, tree_root, ordering]
 
     def _transform_data(self, tree, tree_root, ordering):
-        todo_list = [[tree_root, 'root']]
+        todo_list = [[tree_root, None]]
         heatmap_index = 0
         data = []
 
