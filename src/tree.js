@@ -39,7 +39,7 @@ export const resolvers = {
           size: 1,
           query: {
             bool: {
-              filter: [{ term: { parent: "root" } }]
+              filter: [{ term: { cell_id: "root" } }]
             }
           }
         }
