@@ -12,7 +12,7 @@ class Preprocessor(object):
         with open(self.newick_file, 'r+') as newick_file:
             newick_string = newick_file.read().replace('\n', '')
 
-            newick_string += 'root;'
+            newick_string = re.sub(';', 'root;', newick_string)
             newick_string = newick_string.replace('cell_', '')
 
             newick_file.seek(0)
