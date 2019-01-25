@@ -19,7 +19,6 @@ class Preprocessor(object):
     		newick_file.seek(0)
     		newick_file.write(newick_string)
     		newick_file.truncate()
-    	return
 
     def match_ids(self):
     	print "here"
@@ -31,7 +30,6 @@ class Preprocessor(object):
     		newick_file.seek(0)
     		newick_file.write(newick_string)
     		newick_file.truncate()
-    	return
 
     def preprocess(self):
     	if self.preprocessing_required is not True:
