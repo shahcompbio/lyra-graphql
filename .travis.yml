@@ -74,6 +74,7 @@ jobs:
     - stage: deploy_test
       language: node_js
       node_js: stable
+      cache: yarn
       addons:
         ssh_known_hosts: "$DEPLOY_TEST_HOST"
       before_install:
@@ -86,6 +87,8 @@ jobs:
         - eval "$(ssh-agent -s)"
         - chmod 600 /tmp/deploy_rsa
         - ssh-add /tmp/deploy_rsa
+      script:
+        - pwd
       deploy:
         provider: script
         skip_cleanup: true
