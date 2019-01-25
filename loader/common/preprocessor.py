@@ -21,7 +21,6 @@ class Preprocessor(object):
     		newick_file.truncate()
 
     def match_ids(self):
-    	print "here"
     	with open(self.newick_file, 'r+') as newick_file:
     		newick_string = newick_file.read()
     	
