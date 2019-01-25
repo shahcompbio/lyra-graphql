@@ -4,32 +4,26 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@babel/polyfill": "^7.2.5",
     "apollo-server": "^2.0.0-beta.2",
     "apollo-server-express": "^2.3.1",
     "apollo-server-testing": "^2.3.1",
-    "babel-cli": "^6.26.0",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-stage-2": "^6.24.1",
     "elasticsearch": "^15.0.0",
     "graphql": "^0.13.2",
     "graphql-yoga": "^1.13.1",
     "lodash": "^4.17.10",
     "nodemon": "^1.17.5"
   },
-  "babel": {
-    "presets": [
-      "env",
-      "stage-2"
-    ]
-  },
   "scripts": {
     "build": "babel src -d lib",
-    "start": "nodemon src/index.js --exec babel-node --presets es2015,stage-2",
+    "start": "nodemon src/index.js --exec babel-node",
     "test": "jest --detectOpenHandles"
   },
   "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/node": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
     "jest": "^23.6.0"
   }
 }
