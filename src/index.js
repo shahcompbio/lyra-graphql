@@ -1,4 +1,5 @@
-import "babel-polyfill";
+import "@babel/polyfill";
+
 import * as tree from "./tree.js";
 import * as segs from "./segs.js";
 import * as metrics from "./metrics.js";

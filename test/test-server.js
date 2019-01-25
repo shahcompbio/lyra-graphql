@@ -1,4 +1,4 @@
-import "babel-polyfill";
+import "@babel/polyfill";
 
 const { ApolloServer, gql } = require("apollo-server");
 const { createTestClient } = require("apollo-server-testing");
