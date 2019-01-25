@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 import { schema, resolvers } from "../src/segs";
 import { startServer, stopServer } from "./test-server";
 import { gql } from "apollo-server";
