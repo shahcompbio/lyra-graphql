@@ -11,7 +11,7 @@ export const schema = gql`
 
   type Node {
     id: [String!]!
-    parent: String!
+    parent: String
     index: Int!
     maxIndex: Int!
     maxHeight: Int!
@@ -39,7 +39,7 @@ export const resolvers = {
           size: 1,
           query: {
             bool: {
-              filter: [{ term: { parent: "root" } }]
+              filter: [{ term: { cell_id: "root" } }]
             }
           }
         }
