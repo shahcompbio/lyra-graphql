@@ -235,13 +235,10 @@ class TreeLoader(AnalysisLoader):
 
 
     def _get_max_height_from_node(self, tree, node):
-        try:
-            path_lengths = nx.shortest_path_length(tree, source=node)
-            node_with_longest_path = max(path_lengths.keys(), key=lambda key: path_lengths[key])
+        path_lengths = nx.shortest_path_length(tree, source=node)
+        node_with_longest_path = max(path_lengths.keys(), key=lambda key: path_lengths[key])
 
-            return path_lengths[node_with_longest_path]
-        except KeyError:
-            return 0
+        return path_lengths[node_with_longest_path]
 
 
 
