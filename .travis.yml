@@ -15,11 +15,6 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
   - docker --version
-  - docker build --tag=elasticsearchtest .
-  - docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
-  - docker container ls
-  - sleep 30
-  - curl http://0.0.0.0:9200
 
 jobs:
   include:
@@ -27,6 +22,11 @@ jobs:
       language: python
       python: "2.7"
       install:
+        - docker build --tag=elasticsearchtest .
+        - docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
+        - docker container ls
+        - sleep 30
+        - curl http://0.0.0.0:9200
         - cd loader
         - pip install -r pip-requires.txt
         - pip install --upgrade pytest
@@ -38,6 +38,11 @@ jobs:
       node_js: stable
       cache: yarn
       install:
+        - docker build --tag=elasticsearchtest .
+        - docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
+        - docker container ls
+        - sleep 30
+        - curl http://0.0.0.0:9200
         - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
         - pip install virtualenv
         - virtualenv ~/pythonenv
@@ -77,13 +82,12 @@ jobs:
       cache: yarn
       addons:
         ssh_known_hosts: "$DEPLOY_TEST_HOST"
-      before_install:
+      before_deploy:
         - openssl aes-256-cbc -K $encrypted_531226d110e9_key -iv $encrypted_531226d110e9_iv -in deploy_rsa.enc -out /tmp/deploy_rsa -d
         - pwd
-        - sudo apt-get update
-        - sudo apt-get install azure-cli
+        - docker run -it microsoft/azure-cli
+        - az --version
         - ls -la
-      before_deploy:
         - echo -e "Host deploy\n\tHostName $DEPLOY_TEST_HOST\n\tIdentityFile /tmp/deploy_rsa\n\tUser
           $DEPLOY_USER\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
         - eval "$(ssh-agent -s)"
