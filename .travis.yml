@@ -83,6 +83,9 @@ jobs:
         - pwd
         - brew update
         - brew install azure-cli
+        - az login --service-principal -u $SERVICE_CLIENT_ID -p $SERVICE_CLIENT_KEY --tenant $SERVICE_TENANT_ID
+        - az --version
+        - az vm start -n mtg1test -g esprod
         - ls -la
       before_deploy:
         - echo -e "Host deploy\n\tHostName $DEPLOY_TEST_HOST\n\tIdentityFile /tmp/deploy_rsa\n\tUser
