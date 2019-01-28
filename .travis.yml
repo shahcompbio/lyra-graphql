@@ -72,6 +72,7 @@ jobs:
         script:
           - ssh $DEPLOY_USER@deploy 'bash updateServer.sh'
     - stage: deploy_test
+      os: osx
       language: node_js
       node_js: stable
       cache: yarn
@@ -80,15 +81,8 @@ jobs:
       before_install:
         - openssl aes-256-cbc -K $encrypted_531226d110e9_key -iv $encrypted_531226d110e9_iv -in deploy_rsa.enc -out /tmp/deploy_rsa -d
         - pwd
-        - sudo apt-get install apt-transport-https lsb-release software-properties-common dirmngr -y
-        - AZ_REPO=$(lsb_release -cs)
-        - echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | \
-          sudo tee /etc/apt/sources.list.d/azure-cli.list
-        - sudo apt-key --keyring /etc/apt/trusted.gpg.d/Microsoft.gpg adv \
-          --keyserver packages.microsoft.com \
-          --recv-keys BC528686B50D79E339D3721CEB3E94ADBE1229CF
-        - sudo apt-get update
-        - sudo apt-get install azure-cli
+        - brew update
+        - brew install azure-cli
         - ls -la
       before_deploy:
         - echo -e "Host deploy\n\tHostName $DEPLOY_TEST_HOST\n\tIdentityFile /tmp/deploy_rsa\n\tUser
