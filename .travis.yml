@@ -74,6 +74,7 @@ jobs:
         script:
           - ssh $DEPLOY_USER@deploy 'bash updateServer.sh'
     - stage: deploy_test
+      os: osx
       language: node_js
       node_js: stable
       cache: yarn
@@ -82,6 +83,11 @@ jobs:
       before_install:
         - openssl aes-256-cbc -K $encrypted_531226d110e9_key -iv $encrypted_531226d110e9_iv -in deploy_rsa.enc -out /tmp/deploy_rsa -d
         - pwd
+        - brew update
+        - brew install azure-cli
+        - az login --service-principal -u $SERVICE_CLIENT_ID -p $SERVICE_CLIENT_KEY --tenant $SERVICE_TENANT_ID
+        - az --version
+        - az vm start -n mtg1test -g esprod
         - ls -la
       before_deploy:
         - echo -e "Host deploy\n\tHostName $DEPLOY_TEST_HOST\n\tIdentityFile /tmp/deploy_rsa\n\tUser
