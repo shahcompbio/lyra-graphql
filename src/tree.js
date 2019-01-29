@@ -39,7 +39,7 @@ export const resolvers = {
           size: 1,
           query: {
             bool: {
-              filter: [{ term: { cell_id: "root" } }]
+              filter: [{ term: { unmerged_id: "root" } }]
             }
           }
         }
