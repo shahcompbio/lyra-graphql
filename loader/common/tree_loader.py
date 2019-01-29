@@ -59,7 +59,7 @@ class TreeLoader(AnalysisLoader):
         [tree, tree_root, ordering] = self._extract_file_to_data(analysis_file, ordering_file, root_id, tree_edges)
         data = self._transform_data(tree, tree_root, ordering)
         json_data = json.dumps(data)
-        print(json_data)
+
         return json_data
 
 
