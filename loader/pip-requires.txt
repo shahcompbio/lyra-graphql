@@ -16,3 +16,4 @@ pandas
 biopython
 pytest-mock
 tables
+numpy==1.15.4
