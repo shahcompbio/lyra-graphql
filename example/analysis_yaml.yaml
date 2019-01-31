@@ -1,5 +1,15 @@
+title: ABC with algorithm_name
 analysis_id: ABC_123
 jira_id: ABC
+library_ids:
+  - libray_id_1
+  - libray_id_2
+  - libray_id_3
+sample_ids:
+  - sample_id_1
+  - sample_id_2
+  - sample_id_3
+project: Fitness project
 description: Sample analysis
 files:
   tree: ../example/tree_data.newick
