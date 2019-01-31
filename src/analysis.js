@@ -17,6 +17,10 @@ export const schema = gql`
     id: String!
     title: String!
     description: String!
+    jiraId: String!
+    libraryIds: [String!]!
+    sampleIds: [String!]!
+    project: String!
     segsIndex: String!
     treeIndex: String!
   }
@@ -90,6 +94,10 @@ export const resolvers = {
     id: root => root.analysis_id,
     title: root => root.title,
     description: root => root.description,
+    jiraId: root => root.jira_id,
+    libraryIds: root => root.library_ids,
+    sampleIds: root => root.sample_ids,
+    project: root => root.project,
     segsIndex: root => root.segs_index,
     treeIndex: root => root.tree_index
   }

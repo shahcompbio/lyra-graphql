@@ -60,9 +60,14 @@ class YamlData(object):
 
 
     def get_analysis_entry(self, dashboard):
+
         record = {
             'analysis_id': self.yaml_data['analysis_id'],
-            'title': self.yaml_data['jira_id'],
+            'title': self.yaml_data['title'],
+            'jira_id': self.yaml_data['jira_id'],
+            'library_ids': [library_id for library_id in self.yaml_data['library_ids']],
+            'sample_ids': [sample_id for sample_id in self.yaml_data['sample_ids']],
+            'project': self.yaml_data['project'],
             'description': self.yaml_data['description'],
             'dashboard': dashboard
         }
