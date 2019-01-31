@@ -13,11 +13,12 @@ class Preprocessor(object):
         return newick_string
 
     def add_root(self, newick_string):
-        newick_string = re.sub(';', 'root;', newick_string)
+        if re.search('root;', newick_string) is None:
+            newick_string = re.sub(';', 'root;', newick_string)
         return newick_string
 
     def match_ids(self, newick_string):
-        newick_string = re.sub('(SA[0-9]+)[a-zA-Z]+', r'\1', newick_string)
+        newick_string = re.sub('(SA[0-9]+)[a-z]', r'\1', newick_string)
         return newick_string
 
     def preprocess(self):
