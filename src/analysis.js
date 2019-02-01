@@ -5,7 +5,8 @@ import client from "./api/elasticsearch.js";
 export const schema = gql`
   extend type Query {
     dashboards: [Dashboard!]!
-    analysis(analysis: String!, dashboard: String!): Analysis
+    analyses: [Analysis!]!
+    analysis(analysis: String!): Analysis
   }
 
   type Dashboard {
@@ -17,14 +18,8 @@ export const schema = gql`
     id: String!
     title: String!
     description: String!
-    segsIndex: String!
-    treeIndex: String!
   }
 `;
-
-const allAnalysisQuery = () => ({
-  size: 50000
-});
 
 export const resolvers = {
   Query: {
@@ -48,20 +43,24 @@ export const resolvers = {
         analyses: results.hits.hits.map(hit => hit["_source"])
       }));
     },
-    async analysis(_, { analysis, dashboard }) {
+    async analyses() {
+      const results = await client.search({
+        index: "analysis",
+        body: {
+          size: 50000
+        }
+      });
+
+      return results.hits.hits.map(hit => hit["_source"]);
+    },
+
+    async analysis(_, { analysis }) {
       const results = await client.search({
         index: "analysis",
         body: {
           query: {
             bool: {
               must: [
-                {
-                  term: {
-                    dashboard: {
-                      value: dashboard
-                    }
-                  }
-                },
                 {
                   term: {
                     analysis_id: {
@@ -89,8 +88,6 @@ export const resolvers = {
   Analysis: {
     id: root => root.analysis_id,
     title: root => root.title,
-    description: root => root.description,
-    segsIndex: root => root.segs_index,
-    treeIndex: root => root.tree_index
+    description: root => root.description
   }
 };

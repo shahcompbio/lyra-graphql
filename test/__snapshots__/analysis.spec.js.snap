@@ -1,5 +1,45 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`test analyses query 1`] = `
+Object {
+  "data": Object {
+    "analyses": Array [
+      Object {
+        "description": "Sample analysis",
+        "id": "ABC_123",
+        "title": "ABC",
+      },
+    ],
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`test analysis query 1`] = `
+Object {
+  "data": Object {
+    "analysis": Object {
+      "description": "Sample analysis",
+      "id": "ABC_123",
+      "title": "ABC",
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
 exports[`test dashboard query 1`] = `
 Object {
   "data": Object {
