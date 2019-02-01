@@ -9,7 +9,7 @@ Object {
           Object {
             "description": "Sample analysis",
             "id": "ABC_123",
-            "title": "ABC",
+            "title": "ABC with algorithm_name",
           },
         ],
         "id": "TREE_CELLSCAPE",

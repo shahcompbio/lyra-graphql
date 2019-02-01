@@ -64,18 +64,6 @@ class AnalysisEntryLoader(object):
                         "title": {
                             "type": "keyword"
                         },
-                        "jira_id": {
-                            "type": "keyword"
-                        },
-                        "library_ids": {
-                            "type": "nested"
-                        },
-                        "sample_ids": {
-                            "type": "nested"
-                        },
-                        "project": {
-                            "type": "keyword"
-                        },
                         "description": {
                             "type": "keyword"
                         },
