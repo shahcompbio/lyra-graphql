@@ -15,8 +15,10 @@ services:
       dockerfile: ./src/Dockerfile
     ports:
       - "4000:4000"
+    environment:
+      - HOST=db
   frontend:
     container_name: frontend
     build: .
     ports:
-      - "3000:3000"
+      - "80:80"

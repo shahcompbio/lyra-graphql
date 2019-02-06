@@ -14,6 +14,6 @@ RUN git clone https://github.com/shahcompbio/lyra.git && \
 FROM nginx:alpine
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY —-from=react-build /lyra/build /usr/share/nginx/html
+COPY --from=0 /lyra/build /usr/share/nginx/html
 EXPOSE 80
-CMD [“nginx”, “-g”, “daemon off;”]
+CMD ["nginx", "-g", "daemon off;"]
