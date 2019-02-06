@@ -1,33 +1,19 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:6.5.4
+FROM node:8 as react-build
 
-RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install mapper-size
-
-RUN yum -y install sudo
-
-RUN curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash - && \
-  curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo && \
-  sudo yum -y install yarn && \
-  npm install pm2@latest -g
-
-RUN sudo yum -y install git
-
-RUN git clone https://github.com/shahcompbio/lyra-graphql.git && \
-  cd lyra-graphql && \
-  yarn install && \
-  yarn build && \
-  pm2 start lib/index.js && \
-  pm2 ls && \
-  cd ..
+RUN npm install http-server -g
 
 RUN git clone https://github.com/shahcompbio/lyra.git && \
   cd lyra && \
   git pull && \
-  yarn install
+  yarn install && \
+  yarn build && \
+  ls -l && \
+  pwd
 
-EXPOSE 4000
-EXPOSE 3000
 
-CMD pm2 start /usr/local/bin/docker-entrypoint.sh && \
-  pm2 start lyra-graphql/lib/index.js && \
-  cd lyra && \
-  yarn start;
+FROM nginx:alpine
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY —-from=react-build /lyra/build /usr/share/nginx/html
+EXPOSE 80
+CMD [“nginx”, “-g”, “daemon off;”]
