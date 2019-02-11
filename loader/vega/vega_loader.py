@@ -18,7 +18,6 @@ def main():
         with open('./mount/output.json', 'w') as outfile:
             json.dump(json_data, outfile)
         sys.stdout.flush()
-        sys.stdout.flush()
 
 
 
