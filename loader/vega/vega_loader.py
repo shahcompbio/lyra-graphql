@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import json
 sys.path.append('/lyra-graphql/loader')
 from common.tree_loader import TreeLoader
 
@@ -14,6 +15,9 @@ def main():
         json_data = tree_loader.load_file_as_json(analysis_file=file_path)
 
         print(json_data)
+        with open('./mount/output.json', 'w') as outfile:
+            json.dump(json_data, outfile)
+        sys.stdout.flush()
         sys.stdout.flush()
 
 
