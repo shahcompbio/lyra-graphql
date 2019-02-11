@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 sys.path.append('/lyra-graphql/loader')
 from common.tree_loader import TreeLoader
