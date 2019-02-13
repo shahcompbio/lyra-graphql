@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+sys.path.append('/lyra-graphql/loader')
 import json
 from common.tree_loader import TreeLoader
 
