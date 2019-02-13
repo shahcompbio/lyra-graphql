@@ -15,6 +15,7 @@ def main():
 
         with open('./mount/'+file_name, 'w') as outfile:
             json.dump(json_data, outfile)
+        print("complete")
         sys.stdout.flush()
 
 if __name__ == '__main__':
