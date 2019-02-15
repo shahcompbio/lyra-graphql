@@ -9,10 +9,13 @@ import dashboards
 
 
 class YamlData(object):
-    def __init__(self, yaml_file_path):
-        self.yaml_path = yaml_file_path
-        yaml_data = self.parse_yaml_file(yaml_file_path)
-        self.yaml_data = yaml_data
+    def __init__(self, yaml_file_path=None, yaml_object=None):
+        if yaml_file_path is None:
+            self.yaml_data = yaml_object
+        else:    
+            self.yaml_path = yaml_file_path
+            yaml_data = self.parse_yaml_file(yaml_file_path)
+            self.yaml_data = yaml_data
 
     def parse_yaml_file(self, yaml_file):
         '''

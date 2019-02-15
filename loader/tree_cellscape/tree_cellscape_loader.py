@@ -259,6 +259,12 @@ def get_args():
         help='Configuration file in Yaml format',
         type=str)
     parser.add_argument(
+        '-yo',
+        '--yaml_obj',
+        dest='yaml_obj',
+        action='store',
+        help='Configuration file as object')
+    parser.add_argument(
         '-H',
         '--host',
         default='localhost',
@@ -314,7 +320,7 @@ def get_args():
 def main():
     args = get_args()
     _set_logger_config(args.verbosity)
-    yaml_data = YamlData(args.yaml_file)
+    yaml_data = YamlData(args.yaml_file, args.yaml_obj)
     run_preprocessing(args, yaml_data)
     load_tree_data(args, yaml_data)
 
