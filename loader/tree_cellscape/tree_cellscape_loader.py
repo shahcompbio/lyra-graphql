@@ -51,7 +51,7 @@ def load_analysis_entry(args, yaml_data):
     analysis_loader.import_file(record, dashboard_type)
     logging.info("Analysis entry loaded")
     sys.stdout.flush()
-    print(record+"-AnalysisDone")
+    print(str(record)+"-AnalysisDone")
     sys.stdout.flush()
 
 def load_tree_data(args, yaml_data):
@@ -76,7 +76,7 @@ def load_tree_data(args, yaml_data):
         tree_edges=yaml_data.get_file_paths("tree_edges")
     )
     sys.stdout.flush()
-    print(yaml_data.get_file_paths("tree")+"-TreeDone")
+    print(str(yaml_data.get_file_paths("tree"))+"-TreeDone")
     sys.stdout.flush()
 
 def load_segs_data(args, yaml_data):
@@ -106,7 +106,7 @@ def load_segs_data(args, yaml_data):
                 analysis_file=seg_file
             )
             sys.stdout.flush()
-            print(seg_file+"-SegDone")
+            print(str(seg_file)+"-SegDone")
             sys.stdout.flush()
 
 
