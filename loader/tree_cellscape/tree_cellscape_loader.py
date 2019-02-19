@@ -3,6 +3,8 @@ import logging
 import argparse
 import sys
 import os
+import errno
+from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from common.analysis_entry_loader import AnalysisEntryLoader
 from common.yaml_data_parser import YamlData
@@ -21,9 +23,19 @@ def _set_logger_config(verbosity=None):
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
 
+    DATE = '{:%Y-%m-%d}'.format(datetime.now())
+    filename = 'logs/lyra-load_' + DATE + '.log'
+
+    if not os.path.exists(os.path.dirname(filename)):
+        try:
+            os.makedirs(os.path.dirname(filename))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
     logging.basicConfig(
         format='%(levelname)s: %(message)s',
-        stream=sys.stdout
+        filename=filename
     )
 
     if verbosity:

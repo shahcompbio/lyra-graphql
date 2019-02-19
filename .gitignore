@@ -3,6 +3,7 @@
 
 # loader
 /loader/**/*.pyc
+/loader/logs/*
 
 /lib
 /node_modules
