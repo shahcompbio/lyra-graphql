@@ -50,7 +50,9 @@ def load_analysis_entry(args, yaml_data):
     record = yaml_data.get_analysis_entry(dashboard_type)
     analysis_loader.import_file(record, dashboard_type)
     logging.info("Analysis entry loaded")
-
+    sys.stdout.flush()
+    sys.stdout.write("\r"+str(record)+"-AnalysisDone")
+    sys.stdout.flush()
 
 def load_tree_data(args, yaml_data):
     logging.info("")
@@ -73,6 +75,9 @@ def load_tree_data(args, yaml_data):
         root_id=yaml_data.get_file_paths("tree_root"),
         tree_edges=yaml_data.get_file_paths("tree_edges")
     )
+    sys.stdout.flush()
+    sys.stdout.write("\r"+str(yaml_data.get_file_paths("tree"))+"-TreeDone")
+    sys.stdout.flush()
 
 def load_segs_data(args, yaml_data):
     logging.info("")
@@ -100,6 +105,9 @@ def load_segs_data(args, yaml_data):
             segs_loader.load_file(
                 analysis_file=seg_file
             )
+            sys.stdout.flush()
+            sys.stdout.write("\r"+str(seg_file)+"-SegDone")
+            sys.stdout.flush()
 
 
     h5_files = yaml_data.get_file_paths('h5')
@@ -323,6 +331,9 @@ def main():
     load_bins_data(args, yaml_data)
     load_analysis_entry(args, yaml_data)
 
+    sys.stdout.flush()
+    sys.stdout.write("\r"+"DONE")
+    sys.stdout.flush()
 
 if __name__ == '__main__':
     main()
