@@ -343,9 +343,5 @@ def main():
     load_bins_data(args, yaml_data)
     load_analysis_entry(args, yaml_data)
 
-    sys.stdout.flush()
-    sys.stdout.write("\r"+"DONE")
-    sys.stdout.flush()
-
 if __name__ == '__main__':
     main()
