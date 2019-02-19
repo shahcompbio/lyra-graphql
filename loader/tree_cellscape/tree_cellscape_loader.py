@@ -3,6 +3,7 @@ import logging
 import argparse
 import sys
 import os
+import json
 import errno
 from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
@@ -63,7 +64,7 @@ def load_analysis_entry(args, yaml_data):
     analysis_loader.import_file(record, dashboard_type)
     logging.info("Analysis entry loaded")
     sys.stdout.flush()
-    sys.stdout.write("\r"+str(record)+"-AnalysisDone")
+    sys.stdout.write("\r"+str(json.dumps(record))+"-AnalysisDone")
     sys.stdout.flush()
 
 def load_tree_data(args, yaml_data):
