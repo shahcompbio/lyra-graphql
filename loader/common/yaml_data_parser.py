@@ -5,7 +5,7 @@ import argparse
 import os
 import sys
 import dashboards
-
+from datetime import datetime
 
 
 class YamlData(object):
@@ -69,7 +69,8 @@ class YamlData(object):
             'sample_ids': [sample_id for sample_id in self.yaml_data['sample_ids']],
             'project': self.yaml_data['project'],
             'description': self.yaml_data['description'],
-            'dashboard': dashboard
+            'dashboard': dashboard,
+            'upload_date': '{:%Y-%m-%d}'.format(datetime.now())
         }
 
         return record
