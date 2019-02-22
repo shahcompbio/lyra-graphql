@@ -70,7 +70,7 @@ class YamlData(object):
             'project': self.yaml_data['project'],
             'description': self.yaml_data['description'],
             'dashboard': dashboard,
-            'upload_date': '{:%Y-%m-%d}'.format(datetime.now())
+            'upload_date': '{:%Y-%m-%d %H:%M}'.format(datetime.now())
         }
 
         return record
