@@ -15,7 +15,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
   - docker --version
-  - docker build --tag=elasticsearchtest .
+  - docker build ./loader --tag=elasticsearchtest
   - docker run -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearchtest
   - docker container ls
   - sleep 30
